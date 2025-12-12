@@ -3,30 +3,52 @@ const tabs = document.querySelectorAll(".tab");
 const modal = document.getElementById("modal");
 const modalBody = document.getElementById("modal-body");
 const closeModal = document.querySelector(".close");
+const arSelect = document.getElementById("ar-level");
+const authorSelect = document.getElementById("author");
 
 let currentCategory = "readers";
 let books = [];
 
-// CSV 파일 불러오기
-fetch("도서추천목록.csv") // 경로 확인
-  .then(res => res.text())
-  .then(text => {
-    const lines = text.trim().split("\n");
-    const headers = lines[0].split(",");
-    books = lines.slice(1).map(line => {
-      const cols = line.split(",");
-      let obj = {};
-      headers.forEach((h, i) => obj[h] = cols[i]);
-      return obj;
-    });
-    renderBooks();
-  })
-  .catch(err => console.error("책 데이터 로드 실패:", err));
+// CSV 불러오기 (PapaParse 사용)
+Papa.parse("도서추천목록.csv", {
+  download: true,
+  header: true,
+  skipEmptyLines: true,
+  complete: function(results) {
+    books = results.data;
 
-// 책 카드 렌더링
+    // 필터 옵션 자동 추가
+    const arSet = new Set();
+    const authorSet = new Set();
+    books.forEach(b => {
+      if(b.ar) arSet.add(b.ar);
+      if(b.author) authorSet.add(b.author);
+    });
+
+    Array.from(arSet).sort().forEach(ar => {
+      const option = document.createElement("option");
+      option.value = ar;
+      option.textContent = ar;
+      arSelect.appendChild(option);
+    });
+
+    Array.from(authorSet).sort().forEach(author => {
+      const option = document.createElement("option");
+      option.value = author;
+      option.textContent = author;
+      authorSelect.appendChild(option);
+    });
+
+    renderBooks();
+  },
+  error: function(err) {
+    console.error("CSV 불러오기 실패:", err);
+  }
+});
+
 function renderBooks() {
-  const arFilter = document.getElementById("ar-level").value;
-  const authorFilter = document.getElementById("author").value;
+  const arFilter = arSelect.value;
+  const authorFilter = authorSelect.value;
 
   bookGrid.innerHTML = "";
 
@@ -38,7 +60,7 @@ function renderBooks() {
       const card = document.createElement("div");
       card.className = "card";
       card.innerHTML = `
-        <img src="${book.thumb}" alt="${book.title}">
+        <img src="${book.thumb || ''}" alt="${book.title}">
         <h3>${book.title}</h3>
         <p>AR 레벨: ${book.ar}</p>
         <p>리뷰: ${book.review}</p>
@@ -50,9 +72,9 @@ function renderBooks() {
     });
 }
 
-// 모달 띄우기
 function showModal(book) {
   modalBody.innerHTML = `
+    <div class="close">X</div>
     <h2>${book.title}</h2>
     <p>AR 레벨: ${book.ar}</p>
     <p>리뷰: ${book.review}</p>
@@ -60,12 +82,14 @@ function showModal(book) {
     <p>출판사: ${book.publisher}</p>
     <p>ISBN: ${book.isbn}</p>
     <p>${book.desc}</p>
-    <img src="${book.img}" alt="${book.title}">
+    <img src="${book.img || ''}" alt="${book.title}">
   `;
   modal.style.display = "flex";
+
+  // 모달 닫기 이벤트 재바인딩
+  modalBody.querySelector(".close").onclick = () => modal.style.display = "none";
 }
 
-closeModal.onclick = () => modal.style.display = "none";
 window.onclick = e => { if(e.target === modal) modal.style.display = "none"; };
 
 // 탭 클릭
@@ -75,10 +99,9 @@ tabs.forEach(tab => {
     tab.classList.add("active");
     currentCategory = tab.dataset.category;
     renderBooks();
-  }
+  };
 });
 
 // 필터 변경
-document.getElementById("ar-level").onchange = renderBooks;
-document.getElementById("author").onchange = renderBooks;
-
+arSelect.onchange = renderBooks;
+authorSelect.onchange = renderBooks;
