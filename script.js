@@ -9,7 +9,9 @@ let books = [];
 // CSV 파일 경로
 const csvPath = "booklist.csv";
 
-// CSV 파싱
+// AR 점대 옵션
+const arRanges = ["전체", "1점대", "2점대", "3점대", "4점대", "5점대", "6점대 이상"];
+
 Papa.parse(csvPath, {
   download: true,
   header: true,
@@ -24,41 +26,36 @@ Papa.parse(csvPath, {
   }
 });
 
-// AR 레벨 필터
 function populateFilters() {
   const arSelect = document.getElementById("ar-level");
   arSelect.innerHTML = "";
 
-  const options = ["전체", "1점대", "2점대", "3점대", "4점대", "5점대", "6점대 이상"];
-  options.forEach(optText => {
+  arRanges.forEach(range => {
     const opt = document.createElement("option");
-    opt.value = optText;
-    opt.textContent = optText;
+    opt.value = range;
+    opt.textContent = range;
     arSelect.appendChild(opt);
   });
 }
 
-// 카드 렌더링
 function renderBooks() {
   const arFilter = document.getElementById("ar-level").value;
   bookGrid.innerHTML = "";
 
   const filteredBooks = books.filter(b => {
-    const categoryMatch = (b.category || "").trim() === currentCategory;
+    const bookCat = (b.category || "").trim();
+    const categoryMatch = bookCat === currentCategory;
 
     let arMatch = true;
-    if (arFilter !== "AR레벨" && b.ar) {
-      const ar = parseFloat(b.ar);
-      if (isNaN(ar)) return false;
-
-      const major = Math.floor(ar);
-      switch(arFilter) {
-        case "1점대": arMatch = major === 1; break;
-        case "2점대": arMatch = major === 2; break;
-        case "3점대": arMatch = major === 3; break;
-        case "4점대": arMatch = major === 4; break;
-        case "5점대": arMatch = major === 5; break;
-        case "6점대 이상": arMatch = major >= 6; break;
+    if (arFilter !== "전체" && b.ar) {
+      const arNum = parseFloat(b.ar);
+      switch (arFilter) {
+        case "1점대": arMatch = arNum >= 1 && arNum < 2; break;
+        case "2점대": arMatch = arNum >= 2 && arNum < 3; break;
+        case "3점대": arMatch = arNum >= 3 && arNum < 4; break;
+        case "4점대": arMatch = arNum >= 4 && arNum < 5; break;
+        case "5점대": arMatch = arNum >= 5 && arNum < 6; break;
+        case "6점대 이상": arMatch = arNum >= 6; break;
         default: arMatch = true;
       }
     }
@@ -87,7 +84,6 @@ function renderBooks() {
   });
 }
 
-// 모달
 function showModal(book) {
   modalBody.innerHTML = `
     <div class="close">X</div>
@@ -107,10 +103,10 @@ function showModal(book) {
   if (closeBtn) closeBtn.onclick = () => { modal.style.display = "none"; };
 }
 
-// 모달 외부 클릭 시 닫기
-window.onclick = e => { if(e.target === modal) modal.style.display = "none"; };
+window.onclick = e => {
+  if (e.target === modal) modal.style.display = "none";
+};
 
-// 탭 클릭
 tabs.forEach(tab => {
   tab.onclick = () => {
     tabs.forEach(t => t.classList.remove("active"));
@@ -120,5 +116,4 @@ tabs.forEach(tab => {
   };
 });
 
-// AR 필터 변경 시
 document.getElementById("ar-level").onchange = renderBooks;
