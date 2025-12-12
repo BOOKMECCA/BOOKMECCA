@@ -1,44 +1,55 @@
-// 1️⃣ 구글 시트 ID
-const sheetId = "18fgqBSXFcZgN7udsSnPw6DjIxdsy7D24w72w13czpdQ"; // 확인한 구글 시트 ID 넣기
-const sheetUrl = `https://docs.google.com/spreadsheets/d/18fgqBSXFcZgN7udsSnPw6DjIxdsy7D24w72w13czpdQ/gviz/tq?tqx=out:json`;
+// 1️⃣ 구글 시트 CSV URL
+const sheetCsvUrl = "https://docs.google.com/spreadsheets/d/18fgqBSXFcZgN7udsSnPw6DjIxdsy7D24w72w13czpdQ/export?format=csv";
 
+// 요소 선택
 const bookGrid = document.getElementById("book-grid");
 const tabs = document.querySelectorAll(".tab");
 const modal = document.getElementById("modal");
 const modalBody = document.getElementById("modal-body");
 const closeModal = document.querySelector(".close");
+const arSelect = document.getElementById("ar-level");
+const authorSelect = document.getElementById("author");
 
 let currentCategory = "readers";
-let books = []; // 시트에서 받아올 데이터
+let books = [];
 
-// 2️⃣ 구글 시트에서 데이터 불러오기
-fetch(sheetUrl)
+// 2️⃣ 구글 시트 CSV 불러오기
+fetch(sheetCsvUrl)
   .then(res => res.text())
-  .then(dataText => {
-    const jsonStr = dataText.match(/.*?({.*}).*/s)[1];
-    const data = JSON.parse(jsonStr);
+  .then(csvText => {
+    const parsed = Papa.parse(csvText, { header: true });
+    books = parsed.data;
 
-    books = data.table.rows.map(row => ({
-      title: row.c[0]?.v || "",
-      category: row.c[1]?.v || "",
-      ar: row.c[2]?.v || "",
-      author: row.c[3]?.v || "",
-      review: row.c[4]?.v || "",
-      publisher: row.c[5]?.v || "",
-      isbn: row.c[6]?.v || "",
-      desc: row.c[7]?.v || "",
-      thumb: row.c[8]?.v || "", // 썸네일
-      img: row.c[9]?.v || ""    // 상세 이미지
-    }));
+    // AR 레벨, 작가 필터 옵션 자동 생성
+    const arSet = new Set();
+    const authorSet = new Set();
+    books.forEach(book => {
+      if(book.ar) arSet.add(book.ar);
+      if(book.author) authorSet.add(book.author);
+    });
 
-    renderBooks(); // 시트 데이터 불러온 후 초기 렌더링
+    arSet.forEach(ar => {
+      const option = document.createElement("option");
+      option.value = ar;
+      option.textContent = ar;
+      arSelect.appendChild(option);
+    });
+
+    authorSet.forEach(author => {
+      const option = document.createElement("option");
+      option.value = author;
+      option.textContent = author;
+      authorSelect.appendChild(option);
+    });
+
+    renderBooks();
   })
   .catch(err => console.error("구글 시트 불러오기 실패:", err));
 
 // 3️⃣ 책 카드 렌더링
 function renderBooks() {
-  const arFilter = document.getElementById("ar-level").value;
-  const authorFilter = document.getElementById("author").value;
+  const arFilter = arSelect.value;
+  const authorFilter = authorSelect.value;
 
   bookGrid.innerHTML = "";
 
@@ -65,6 +76,7 @@ function renderBooks() {
 // 4️⃣ 모달 띄우기
 function showModal(book) {
   modalBody.innerHTML = `
+    <div class="close">X</div>
     <h2>${book.title}</h2>
     <p>AR 레벨: ${book.ar}</p>
     <p>리뷰: ${book.review}</p>
@@ -75,10 +87,12 @@ function showModal(book) {
     <img src="${book.img}" alt="${book.title}">
   `;
   modal.style.display = "flex";
+
+  // 모달 닫기 이벤트 다시 연결
+  modalBody.querySelector(".close").onclick = () => modal.style.display = "none";
 }
 
-// 5️⃣ 모달 닫기
-closeModal.onclick = () => modal.style.display = "none";
+// 5️⃣ 모달 배경 클릭 시 닫기
 window.onclick = e => { if(e.target === modal) modal.style.display = "none"; };
 
 // 6️⃣ 탭 클릭
@@ -92,5 +106,5 @@ tabs.forEach(tab => {
 });
 
 // 7️⃣ 필터 변경
-document.getElementById("ar-level").onchange = renderBooks;
-document.getElementById("author").onchange = renderBooks;
+arSelect.onchange = renderBooks;
+authorSelect.onchange = renderBooks;
