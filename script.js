@@ -51,21 +51,18 @@ function renderBooks() {
   filteredBooks = books.filter(book => book["카테고리"] === currentCategory);
 
   if (arValue !== "all") {
-    const filterMin = Number(arValue);
-    const filterMax = (arValue === "6") ? Infinity : filterMin + 1;
-
     filteredBooks = filteredBooks.filter(book => {
-      if (!book["AR레벨"]) return false;
+      let arStr = book["AR레벨"]; // "3.7~4.0" 또는 "2.5"
+      let minAR, maxAR;
 
-      // AR 범위 처리: "3.7~4.1" 같은 경우
-      let minAR = 0, maxAR = 0;
-      if (book["AR레벨"].includes("~")) {
-        const parts = book["AR레벨"].split("~");
-        minAR = parseFloat(parts[0]);
-        maxAR = parseFloat(parts[1]);
+      if (arStr.includes("~")) {
+        [minAR, maxAR] = arStr.split("~").map(Number);
       } else {
-        minAR = maxAR = parseFloat(book["AR레벨"]);
+        minAR = maxAR = parseFloat(arStr);
       }
+
+      const filterMin = Number(arValue);    // 선택된 점대
+      const filterMax = filterMin + 1;
 
       return maxAR >= filterMin && minAR < filterMax;
     });
