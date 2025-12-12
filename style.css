@@ -66,3 +66,33 @@ h1 { padding: 10px; }
   background: none;
   border: none;
 }
+
+/* 닫기 버튼 상단 고정 */
+.modal-content .close {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  font-size: 28px;
+  z-index: 101;
+  cursor: pointer;
+}
+
+/* 반투명 좌우 화살표 */
+.nav-arrow {
+  position: fixed; /* 스크롤 위치와 상관없이 항상 보임 */
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 36px;
+  background: rgba(0,0,0,0.3);
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 100;
+}
+
+#prevBtn { left: 10px; }
+#nextBtn { right: 10px; }
+
+.nav-arrow.hidden { display: none; }
