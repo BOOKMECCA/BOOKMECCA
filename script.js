@@ -52,9 +52,22 @@ function renderBooks() {
 
   if (arValue !== "all") {
     filteredBooks = filteredBooks.filter(book => {
-      let ar = parseFloat(book["AR레벨"]);
-      if (arValue === "6") return ar >= 6;
-      return Math.floor(ar) === Number(arValue);
+      const arText = book["AR레벨"];
+      if (!arText) return false; // AR레벨 없으면 제외
+
+      // AR 범위를 파싱
+      const rangeParts = arText.split("~").map(s => parseFloat(s));
+      const arMin = rangeParts[0];
+      const arMax = rangeParts[1] !== undefined ? rangeParts[1] : rangeParts[0];
+
+      const filterNum = Number(arValue);
+
+      if (filterNum === 6) {
+        return arMax >= 6; // 6점대 이상
+      } else {
+        // 범위의 최소나 최대가 해당 점대에 속하면 통과
+        return Math.floor(arMin) === filterNum || Math.floor(arMax) === filterNum;
+      }
     });
   }
 
