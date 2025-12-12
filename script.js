@@ -3,52 +3,57 @@ const tabs = document.querySelectorAll(".tab");
 const modal = document.getElementById("modal");
 const modalBody = document.getElementById("modal-body");
 const closeModal = document.querySelector(".close");
-const arSelect = document.getElementById("ar-level");
-const authorSelect = document.getElementById("author");
 
 let currentCategory = "readers";
 let books = [];
 
-// CSV 불러오기 (PapaParse 사용)
+// CSV 불러오기
 Papa.parse("booklist.csv", {
   download: true,
   header: true,
   skipEmptyLines: true,
   complete: function(results) {
     books = results.data;
-
-    // 필터 옵션 자동 추가
-    const arSet = new Set();
-    const authorSet = new Set();
-    books.forEach(b => {
-      if(b.ar) arSet.add(b.ar);
-      if(b.author) authorSet.add(b.author);
-    });
-
-    Array.from(arSet).sort().forEach(ar => {
-      const option = document.createElement("option");
-      option.value = ar;
-      option.textContent = ar;
-      arSelect.appendChild(option);
-    });
-
-    Array.from(authorSet).sort().forEach(author => {
-      const option = document.createElement("option");
-      option.value = author;
-      option.textContent = author;
-      authorSelect.appendChild(option);
-    });
-
+    populateFilters();
     renderBooks();
   },
-  error: function(err) {
-    console.error("CSV 불러오기 실패:", err);
+  error: function(err){
+    console.error("CSV 로딩 실패:", err);
   }
 });
 
+// 필터 옵션 채우기
+function populateFilters() {
+  const arSelect = document.getElementById("ar-level");
+  const authorSelect = document.getElementById("author");
+
+  const arSet = new Set();
+  const authorSet = new Set();
+
+  books.forEach(book => {
+    if(book.ar) arSet.add(book.ar);
+    if(book.author) authorSet.add(book.author);
+  });
+
+  Array.from(arSet).sort().forEach(ar => {
+    const opt = document.createElement("option");
+    opt.value = ar;
+    opt.textContent = ar;
+    arSelect.appendChild(opt);
+  });
+
+  Array.from(authorSet).sort().forEach(author => {
+    const opt = document.createElement("option");
+    opt.value = author;
+    opt.textContent = author;
+    authorSelect.appendChild(opt);
+  });
+}
+
+// 책 카드 렌더링
 function renderBooks() {
-  const arFilter = arSelect.value;
-  const authorFilter = authorSelect.value;
+  const arFilter = document.getElementById("ar-level").value;
+  const authorFilter = document.getElementById("author").value;
 
   bookGrid.innerHTML = "";
 
@@ -60,7 +65,7 @@ function renderBooks() {
       const card = document.createElement("div");
       card.className = "card";
       card.innerHTML = `
-        <img src="${book.thumb || ''}" alt="${book.title}">
+        <img src="${book.thumb}" alt="${book.title}">
         <h3>${book.title}</h3>
         <p>AR 레벨: ${book.ar}</p>
         <p>리뷰: ${book.review}</p>
@@ -72,6 +77,7 @@ function renderBooks() {
     });
 }
 
+// 모달 띄우기
 function showModal(book) {
   modalBody.innerHTML = `
     <div class="close">X</div>
@@ -82,12 +88,12 @@ function showModal(book) {
     <p>출판사: ${book.publisher}</p>
     <p>ISBN: ${book.isbn}</p>
     <p>${book.desc}</p>
-    <img src="${book.img || ''}" alt="${book.title}">
+    <img src="${book.img}" alt="${book.title}">
   `;
   modal.style.display = "flex";
 
-  // 모달 닫기 이벤트 재바인딩
-  modalBody.querySelector(".close").onclick = () => modal.style.display = "none";
+  // 모달 닫기
+  document.querySelector("#modal .close").onclick = () => modal.style.display = "none";
 }
 
 window.onclick = e => { if(e.target === modal) modal.style.display = "none"; };
@@ -99,10 +105,9 @@ tabs.forEach(tab => {
     tab.classList.add("active");
     currentCategory = tab.dataset.category;
     renderBooks();
-  };
+  }
 });
 
 // 필터 변경
-arSelect.onchange = renderBooks;
-authorSelect.onchange = renderBooks;
-
+document.getElementById("ar-level").onchange = renderBooks;
+document.getElementById("author").onchange = renderBooks;
