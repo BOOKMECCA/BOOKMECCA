@@ -4,7 +4,7 @@ let filteredBooks = [];
 let currentDetailIndex = 0;
 
 // CSV 불러오기 (GitHub Pages용 절대경로)
-Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/books.csv", {
+Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.csv", {
   download: true,
   header: true,
   complete: function(results) {
@@ -96,3 +96,4 @@ window.onclick = function(event) {
     modal.style.display = "none";
   }
 }
+
