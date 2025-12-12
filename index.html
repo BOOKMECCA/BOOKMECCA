@@ -2,20 +2,25 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>도서 목록</title>
+  <title>추천 도서 목록</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
-    .tabs { display: flex; margin-bottom: 20px; }
+
+    .filter select { margin-right: 10px; }
+
+    .tabs { display: flex; margin: 20px 0; }
     .tab { margin-right: 10px; padding: 5px 10px; cursor: pointer; border: 1px solid #ccc; }
-    .tab.active { background-color: #eee; font-weight: bold; }
+    .tab.active { background-color: #007bff; color: white; font-weight: bold; }
+
     #book-grid { display: flex; flex-wrap: wrap; gap: 20px; }
-    .card { width: calc(50% - 10px); border: 1px solid #ccc; padding: 10px; cursor: pointer; }
+    .card { width: calc(50% - 10px); border: 1px solid #ccc; padding: 10px; cursor: pointer; background: white; }
     .card img { width: 100%; height: auto; }
+
     #modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
-    #modal-body { background: #fff; padding: 20px; max-width: 600px; max-height: 90%; overflow-y: auto; }
-    .close { cursor:pointer; float:right; font-weight:bold; }
-    select { margin-right: 10px; }
+    #modal-body { background: #fff; padding: 20px; max-width: 600px; max-height: 90%; overflow-y: auto; position: relative; }
+    .close { cursor:pointer; position: absolute; top:5px; right:10px; font-weight: bold; font-size: 20px; }
   </style>
+
   <!-- PapaParse 라이브러리 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 </head>
@@ -23,16 +28,16 @@
 
   <h1>추천 도서 목록</h1>
 
-  <!-- 필터 -->
-  <select id="ar-level">
-    <option value="all">전체 AR 레벨</option>
-  </select>
+  <div class="filter">
+    <select id="ar-level">
+      <option value="all">전체 AR 레벨</option>
+    </select>
 
-  <select id="author">
-    <option value="all">전체 작가</option>
-  </select>
+    <select id="author">
+      <option value="all">전체 작가</option>
+    </select>
+  </div>
 
-  <!-- 탭 -->
   <div class="tabs">
     <div class="tab active" data-category="readers">리더스</div>
     <div class="tab" data-category="chapterbooks">챕터북</div>
@@ -40,17 +45,14 @@
     <div class="tab" data-category="nonfiction">논픽션</div>
   </div>
 
-  <!-- 도서 카드 그리드 -->
   <div id="book-grid"></div>
 
-  <!-- 모달 -->
   <div id="modal">
     <div id="modal-body">
       <div class="close">X</div>
     </div>
   </div>
 
-  <!-- script.js -->
   <script src="script.js"></script>
 </body>
 </html>
