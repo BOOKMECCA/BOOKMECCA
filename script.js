@@ -10,7 +10,7 @@ let currentCategory = "readers";
 let books = [];
 
 // CSV 불러오기 (PapaParse 사용)
-Papa.parse("도서추천목록.csv", {
+Papa.parse("booklist.csv", {
   download: true,
   header: true,
   skipEmptyLines: true,
@@ -105,3 +105,4 @@ tabs.forEach(tab => {
 // 필터 변경
 arSelect.onchange = renderBooks;
 authorSelect.onchange = renderBooks;
+
