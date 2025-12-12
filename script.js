@@ -6,7 +6,6 @@ const bookGrid = document.getElementById("book-grid");
 const tabs = document.querySelectorAll(".tab");
 const modal = document.getElementById("modal");
 const modalBody = document.getElementById("modal-body");
-const closeModal = document.querySelector(".close");
 const arSelect = document.getElementById("ar-level");
 const authorSelect = document.getElementById("author");
 
@@ -17,8 +16,21 @@ let books = [];
 fetch(sheetCsvUrl)
   .then(res => res.text())
   .then(csvText => {
-    const parsed = Papa.parse(csvText, { header: true });
-    books = parsed.data;
+    const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+    
+    // 컬럼 이름 기준으로 데이터 정리
+    books = parsed.data.map(book => ({
+      title: book.title || "",
+      category: book.category || "",
+      ar: book.ar || "",
+      author: book.author || "",
+      review: book.review || "",
+      publisher: book.publisher || "",
+      isbn: book.isbn || "",
+      desc: book.desc || "",
+      thumb: book.thumb || "",
+      img: book.img || ""
+    }));
 
     // AR 레벨, 작가 필터 옵션 자동 생성
     const arSet = new Set();
@@ -88,7 +100,6 @@ function showModal(book) {
   `;
   modal.style.display = "flex";
 
-  // 모달 닫기 이벤트 다시 연결
   modalBody.querySelector(".close").onclick = () => modal.style.display = "none";
 }
 
