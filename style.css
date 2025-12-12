@@ -40,9 +40,10 @@ header h1 {
   font-weight: bold;
 }
 
+/* --------------------- 책 카드 --------------------- */
 .book-list {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, 1fr); /* 한 줄 2개 */
   gap: 10px;
   padding: 10px;
 }
@@ -56,9 +57,13 @@ header h1 {
 
 .book-card img {
   width: 100%;
-  height: auto;
+  height: 180px;       /* 카드 이미지 높이 고정 */
+  object-fit: cover;   /* 비율 유지하며 잘림 */
+  display: block;
+  margin-bottom: 8px;
 }
 
+/* --------------------- 모달 --------------------- */
 .modal {
   display: none;
   position: fixed;
@@ -101,4 +106,14 @@ header h1 {
   cursor: pointer;
   background: none;
   border: none;
+}
+
+/* --------------------- 모바일 대응 --------------------- */
+@media(max-width: 500px){
+  .book-card img {
+    height: 150px; /* 모바일에서는 조금 낮게 */
+  }
+  .book-list {
+    grid-template-columns: repeat(2, 1fr); /* 모바일에서도 한 줄 2개 유지 */
+  }
 }
