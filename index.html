@@ -2,8 +2,8 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>추천 도서 목록</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BOOKMECCA</title>
   <style>
     * { box-sizing: border-box; }
     body { font-family: Arial, sans-serif; margin:0; padding:10px; }
@@ -90,7 +90,6 @@
       user-select: none;
     }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
   <h1>추천 도서 목록</h1>
@@ -132,112 +131,7 @@
     </div>
   </div>
 
-  <script>
-    let books = [];
-    let currentCategory = "리더스";
-    let filteredBooks = [];
-    let currentDetailIndex = 0;
-
-    // CSV 로딩
-    Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.csv", {
-      download: true,
-      header: true,
-      delimiter: "\t",
-      skipEmptyLines: true,
-      complete: function(results){
-        // 빈 도서명 제거 + http -> https
-        books = results.data.filter(b => b["도서명"]).map(book => {
-          book["메인"] = book["메인"] ? book["메인"].replace(/^http:/,"https:") : "";
-          book["상세페이지"] = book["상세페이지"] ? book["상세페이지"].replace(/^http:/,"https:") : "";
-          return book;
-        });
-        renderBooks();
-      }
-    });
-
-    // 탭 클릭
-    document.querySelectorAll(".tab").forEach(tab => {
-      tab.addEventListener("click", (e) => {
-        document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-        e.target.classList.add("active");
-        currentCategory = e.target.dataset.category;
-        renderBooks();
-      });
-    });
-
-    // AR 필터
-    document.getElementById("arFilter").addEventListener("change", renderBooks);
-
-    function renderBooks(){
-      const arValue = document.getElementById("arFilter").value;
-      filteredBooks = books.filter(book => book["카테고리"] === currentCategory);
-
-      if(arValue!=="all"){
-        filteredBooks = filteredBooks.filter(book => {
-          let ar = parseFloat(book["AR레벨"]);
-          if(isNaN(ar)) return false;
-          if(arValue==="6") return ar>=6;
-          return Math.floor(ar)===Number(arValue);
-        });
-      }
-
-      const bookList = document.getElementById("bookList");
-      bookList.innerHTML = "";
-
-      filteredBooks.forEach((book,index)=>{
-        const card = document.createElement("div");
-        card.className="book-card";
-        card.innerHTML=`
-          <img src="${book["메인"]}" alt="${book["도서명"]}">
-          <h3>${book["도서명"]}</h3>
-          <p>AR 레벨: ${book["AR레벨"] || "-"}</p>
-          <p>리뷰: ${book["리뷰"] || "-"}</p>
-          <p>작가명: ${book["작가"] || "-"}</p>
-          <p>${book["설명"] ? book["설명"].replace(/\n/g,"<br>") : ''}</p>
-        `;
-        card.addEventListener("click",()=>openDetail(index));
-        bookList.appendChild(card);
-
-        book["_detailImage"] = book["상세페이지"];
-      });
-    }
-
-    // 모달
-    const modal = document.getElementById("detailModal");
-    const closeBtn = document.querySelector(".close");
-    closeBtn.onclick = ()=> modal.style.display="none";
-
-    function openDetail(index){
-      currentDetailIndex=index;
-      showDetail();
-      modal.style.display="flex";
-    }
-
-    function showDetail(){
-      const book = filteredBooks[currentDetailIndex];
-      if(!book) return;
-      document.getElementById("detailTitle").textContent = book["도서명"];
-      document.getElementById("detailAR").textContent = book["AR레벨"] || "-";
-      document.getElementById("detailReview").textContent = book["리뷰"] || "-";
-      document.getElementById("detailAuthor").textContent = book["작가"] || "-";
-      document.getElementById("detailPublisher").textContent = book["출판사"] || "-";
-      document.getElementById("detailISBN").textContent = book["ISBN"] || "-";
-      document.getElementById("detailDesc").innerHTML = book["설명"] ? book["설명"].replace(/\n/g,"<br>") : '';
-      document.getElementById("detailImage").src = book["_detailImage"] || "";
-    }
-
-    document.getElementById("prevBtn").addEventListener("click",()=>{
-      currentDetailIndex=(currentDetailIndex-1+filteredBooks.length)%filteredBooks.length;
-      showDetail();
-    });
-    document.getElementById("nextBtn").addEventListener("click",()=>{
-      currentDetailIndex=(currentDetailIndex+1)%filteredBooks.length;
-      showDetail();
-    });
-
-    window.onclick = function(event){
-      if(event.target==modal) modal.style.display="none";
-    }
-  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
