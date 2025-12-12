@@ -3,17 +3,29 @@ let currentCategory = "리더스";
 let filteredBooks = [];
 let currentDetailIndex = 0;
 
+const placeholderImage = "https://via.placeholder.com/150x200?text=No+Image";
+
+// CSV 불러오기
 Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.csv", {
   download:true,
   header:true,
   delimiter:"\t",
   complete: function(results){
-    books = results.data.map(book => {
-      // 이미지 URL HTTP → HTTPS 자동 변환
-      book["메인"] = book["메인"] ? book["메인"].replace(/^http:/,"https:") : "";
-      book["상세페이지"] = book["상세페이지"] ? book["상세페이지"].replace(/^http:/,"https:") : "";
-      return book;
-    });
+    books = results.data
+      .filter(book => book["도서명"] && book["도서명"].trim() !== "")
+      .map(book => {
+        // 필드 안전 처리
+        book["AR레벨"] = book["AR레벨"] || "정보 없음";
+        book["리뷰"] = book["리뷰"] || "정보 없음";
+        book["작가"] = book["작가"] || "정보 없음";
+        book["출판사"] = book["출판사"] || "정보 없음";
+        book["ISBN"] = book["ISBN"] || "정보 없음";
+        book["설명"] = book["설명"] || "";
+        // 이미지 처리
+        book["메인"] = book["메인"] ? book["메인"].replace(/^http:/,"https:") : placeholderImage;
+        book["상세페이지"] = book["상세페이지"] ? book["상세페이지"].replace(/^http:/,"https:") : book["메인"];
+        return book;
+      });
     renderBooks();
   }
 });
@@ -28,9 +40,10 @@ document.querySelectorAll(".tab").forEach(tab => {
   });
 });
 
-// AR 레벨 필터
+// AR 필터
 document.getElementById("arFilter").addEventListener("change", renderBooks);
 
+// 카드 렌더링
 function renderBooks(){
   const arValue = document.getElementById("arFilter").value;
   filteredBooks = books.filter(book => book["카테고리"] === currentCategory);
@@ -38,6 +51,7 @@ function renderBooks(){
   if(arValue!=="all"){
     filteredBooks = filteredBooks.filter(book => {
       let ar = parseFloat(book["AR레벨"]);
+      if(isNaN(ar)) return false;
       if(arValue==="6") return ar>=6;
       return Math.floor(ar)===Number(arValue);
     });
@@ -47,7 +61,6 @@ function renderBooks(){
   bookList.innerHTML = "";
 
   filteredBooks.forEach((book,index)=>{
-    if(!book["도서명"]) return;
     const card = document.createElement("div");
     card.className="book-card";
     card.innerHTML=`
@@ -56,12 +69,10 @@ function renderBooks(){
       <p>AR 레벨: ${book["AR레벨"]}</p>
       <p>리뷰: ${book["리뷰"]}</p>
       <p>작가명: ${book["작가"]}</p>
-      <p>${book["설명"] ? book["설명"].replace(/\n/g,"<br>") : ''}</p>
+      <p>${book["설명"].replace(/\n/g,"<br>")}</p>
     `;
     card.addEventListener("click",()=>openDetail(index));
     bookList.appendChild(card);
-
-    // 상세 이미지 미리 저장
     book["_detailImage"] = book["상세페이지"];
   });
 }
@@ -86,7 +97,7 @@ function showDetail(){
   document.getElementById("detailAuthor").textContent = book["작가"];
   document.getElementById("detailPublisher").textContent = book["출판사"];
   document.getElementById("detailISBN").textContent = book["ISBN"];
-  document.getElementById("detailDesc").innerHTML = book["설명"] ? book["설명"].replace(/\n/g,"<br>") : '';
+  document.getElementById("detailDesc").innerHTML = book["설명"].replace(/\n/g,"<br>");
   document.getElementById("detailImage").src = book["_detailImage"];
 }
 
