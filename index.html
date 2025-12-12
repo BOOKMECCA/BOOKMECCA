@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>추천 도서</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BOOKMECCA</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<header>
   <h1>추천 도서 목록</h1>
-  <label for="arFilter">AR 레벨 필터:</label>
+
+  <!-- AR 필터 -->
+  <label for="arFilter">AR 레벨:</label>
   <select id="arFilter">
     <option value="all">전체</option>
     <option value="1">1점대</option>
@@ -20,42 +20,37 @@
     <option value="5">5점대</option>
     <option value="6">6점대 이상</option>
   </select>
-</header>
 
-<nav class="tabs">
-  <button class="tab active" data-category="리더스">리더스</button>
-  <button class="tab" data-category="챕터북">챕터북</button>
-  <button class="tab" data-category="스토리북">스토리북</button>
-  <button class="tab" data-category="논픽션">논픽션</button>
-  <button class="tab" data-category="대표상품">대표상품</button>
-</nav>
+  <!-- 탭 -->
+  <div id="tabs">
+    <button class="tab active" data-category="리더스">리더스</button>
+    <button class="tab" data-category="챕터북">챕터북</button>
+    <button class="tab" data-category="스토리북">스토리북</button>
+    <button class="tab" data-category="논픽션">논픽션</button>
+    <button class="tab" data-category="대표상품">대표상품</button>
+  </div>
 
-<main>
-  <section id="bookList" class="book-list"></section>
-</main>
+  <!-- 도서 목록 -->
+  <div id="bookList" class="book-list"></div>
 
-<!-- 상세보기 모달 -->
-<div id="detailModal" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <div class="detail-info">
+  <!-- 상세 모달 -->
+  <div id="detailModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
       <h2 id="detailTitle"></h2>
-      <p><strong>AR 레벨:</strong> <span id="detailAR"></span></p>
-      <p><strong>아마존 리뷰:</strong> <span id="detailReview"></span></p>
-      <p><strong>작가명:</strong> <span id="detailAuthor"></span></p>
-      <p><strong>출판사:</strong> <span id="detailPublisher"></span></p>
-      <p><strong>ISBN:</strong> <span id="detailISBN"></span></p>
+      <p>AR 레벨: <span id="detailAR"></span></p>
+      <p>아마존 리뷰: <span id="detailReview"></span></p>
+      <p>작가명: <span id="detailAuthor"></span></p>
+      <p>출판사: <span id="detailPublisher"></span></p>
+      <p>ISBN: <span id="detailISBN"></span></p>
       <p id="detailDesc"></p>
-    </div>
-    <div class="detail-image-wrapper">
-      <button id="prevBtn">&#8592;</button>
-      <img id="detailImage" src="" alt="도서 이미지">
-      <button id="nextBtn">&#8594;</button>
+      <img id="detailImage" src="" alt="">
+      <button id="prevBtn">◀ 이전</button>
+      <button id="nextBtn">다음 ▶</button>
     </div>
   </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
-<script src="script.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
