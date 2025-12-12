@@ -52,19 +52,24 @@ function renderBooks() {
 
   if (arValue !== "all") {
     filteredBooks = filteredBooks.filter(book => {
-      let arStr = book["AR레벨"]; // "3.7~4.0" 또는 "2.5"
-      let minAR, maxAR;
+      const arStr = book["AR레벨"];
+      if (!arStr) return false;
 
+      // AR 값이 범위인지 체크
+      let minAR, maxAR;
       if (arStr.includes("~")) {
-        [minAR, maxAR] = arStr.split("~").map(Number);
+        const parts = arStr.split("~").map(p => parseFloat(p));
+        minAR = parts[0];
+        maxAR = parts[1];
       } else {
         minAR = maxAR = parseFloat(arStr);
       }
 
-      const filterMin = Number(arValue);    // 선택된 점대
-      const filterMax = filterMin + 1;
+      const filterMin = parseInt(arValue, 10);
+      const filterMax = arValue === "6" ? Infinity : filterMin + 0.9;
 
-      return maxAR >= filterMin && minAR < filterMax;
+      // 범위 겹침 체크
+      return !(maxAR < filterMin || minAR > filterMax);
     });
   }
 
