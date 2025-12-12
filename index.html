@@ -72,23 +72,33 @@
       max-height: 90%;
     }
     .close {
-      position: absolute;
+      position: fixed; /* 상단 고정 */
       top: 10px; right: 10px;
       font-size: 24px;
       cursor: pointer;
       user-select: none;
+      z-index: 1000;
     }
     #detailImage { width: 100%; margin-top: 12px; }
-    #prevBtn, #nextBtn {
-      margin-top: 10px;
-      padding: 6px 12px;
-      cursor: pointer;
-      background: #007bff;
-      color: white;
+
+    /* 이전/다음 화살표 */
+    .arrow-btn {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 36px;
+      color: rgba(255,255,255,0.6);
+      background: rgba(0,0,0,0.2);
       border: none;
-      border-radius: 3px;
+      cursor: pointer;
+      padding: 10px;
       user-select: none;
+      z-index: 1000;
     }
+    #arrowPrev { left: 10px; }
+    #arrowNext { right: 10px; }
+
+    .hidden { display: none; }
   </style>
 </head>
 <body>
@@ -126,10 +136,12 @@
       <p>ISBN: <span id="detailISBN"></span></p>
       <p id="detailDesc"></p>
       <img id="detailImage" src="" alt="상세 이미지" />
-      <button id="prevBtn">◀ 이전</button>
-      <button id="nextBtn">다음 ▶</button>
     </div>
   </div>
+
+  <!-- 반투명 화살표 버튼 -->
+  <button id="arrowPrev" class="arrow-btn hidden">&lt;</button>
+  <button id="arrowNext" class="arrow-btn hidden">&gt;</button>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="script.js"></script>
