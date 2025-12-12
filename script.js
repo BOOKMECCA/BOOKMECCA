@@ -55,7 +55,6 @@ function renderBooks() {
       const arStr = book["AR레벨"];
       if (!arStr) return false;
 
-      // AR 값이 범위인지 체크
       let minAR, maxAR;
       if (arStr.includes("~")) {
         const parts = arStr.split("~").map(p => parseFloat(p));
@@ -66,7 +65,7 @@ function renderBooks() {
       }
 
       const filterMin = parseInt(arValue, 10);
-      const filterMax = arValue === "6" ? Infinity : filterMin + 1 - 0.0001; // 수정됨
+      const filterMax = arValue === "6" ? Infinity : filterMin + 0.9;
 
       // 범위 겹침 체크
       return !(maxAR < filterMin || minAR > filterMax);
@@ -78,17 +77,16 @@ function renderBooks() {
   filteredBooks.forEach((book, idx) => {
     if (!book["도서명"]) return;
 
+    let cardHTML = `<img src="${book["메인"]}" alt="${book["도서명"]}" />
+                    <h3>${book["도서명"]}</h3>`;
+    if (book["AR레벨"]) cardHTML += `<p>AR 레벨: ${book["AR레벨"]}</p>`;
+    if (book["리뷰"]) cardHTML += `<p>리뷰: ${book["리뷰"]}</p>`;
+    if (book["작가"]) cardHTML += `<p>작가명: ${book["작가"]}</p>`;
+    if (book["설명"]) cardHTML += `<p>${book["설명"].replace(/\n/g, "<br>")}</p>`;
+
     const card = document.createElement("div");
     card.className = "book-card";
-    card.innerHTML = `
-      <img src="${book["메인"]}" alt="${book["도서명"]}" />
-      <h3>${book["도서명"]}</h3>
-      <p>AR 레벨: ${book["AR레벨"]}</p>
-      <p>리뷰: ${book["리뷰"]}</p>
-      <p>작가명: ${book["작가"]}</p>
-      <p>${book["설명"] ? book["설명"].replace(/\n/g, "<br>") : ""}</p>
-    `;
-
+    card.innerHTML = cardHTML;
     card.addEventListener("click", () => openDetail(idx));
     bookList.appendChild(card);
   });
@@ -105,13 +103,50 @@ function showDetail() {
   if (!book) return;
 
   detailTitle.textContent = book["도서명"];
-  detailAR.textContent = book["AR레벨"];
-  detailReview.textContent = book["리뷰"];
-  detailAuthor.textContent = book["작가"];
-  detailPublisher.textContent = book["출판사"];
-  detailISBN.textContent = book["ISBN"];
-  detailDesc.innerHTML = book["설명"] ? book["설명"].replace(/\n/g, "<br>") : "";
-  detailImage.src = book["상세페이지"];
+
+  if (book["AR레벨"]) {
+    detailAR.textContent = book["AR레벨"];
+    detailAR.parentElement.style.display = "block";
+  } else {
+    detailAR.parentElement.style.display = "none";
+  }
+
+  if (book["리뷰"]) {
+    detailReview.textContent = book["리뷰"];
+    detailReview.parentElement.style.display = "block";
+  } else {
+    detailReview.parentElement.style.display = "none";
+  }
+
+  if (book["작가"]) {
+    detailAuthor.textContent = book["작가"];
+    detailAuthor.parentElement.style.display = "block";
+  } else {
+    detailAuthor.parentElement.style.display = "none";
+  }
+
+  if (book["출판사"]) {
+    detailPublisher.textContent = book["출판사"];
+    detailPublisher.parentElement.style.display = "block";
+  } else {
+    detailPublisher.parentElement.style.display = "none";
+  }
+
+  if (book["ISBN"]) {
+    detailISBN.textContent = book["ISBN"];
+    detailISBN.parentElement.style.display = "block";
+  } else {
+    detailISBN.parentElement.style.display = "none";
+  }
+
+  if (book["설명"]) {
+    detailDesc.innerHTML = book["설명"].replace(/\n/g, "<br>");
+    detailDesc.style.display = "block";
+  } else {
+    detailDesc.style.display = "none";
+  }
+
+  detailImage.src = book["상세페이지"] || "";
 }
 
 closeBtn.addEventListener("click", () => {
