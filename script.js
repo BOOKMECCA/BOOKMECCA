@@ -1,46 +1,39 @@
-// ==== 구글 시트 JSON API URL ====
-const sheetId = "18fgqBSXFcZgN7udsSnPw6DjIxdsy7D24w72w13czpdQ";
-const sheetRange = "Sheet1"; // 시트 이름이 Sheet1이면 그대로, 아니면 정확한 시트 이름
-const sheetUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetRange}?key=AIzaSyD-XXXXX`; // → 아래 방법으로 키 생성 필요
-
-let books = [];
-let currentCategory = "readers";
-
 const bookGrid = document.getElementById("book-grid");
 const tabs = document.querySelectorAll(".tab");
 const modal = document.getElementById("modal");
 const modalBody = document.getElementById("modal-body");
-const arSelect = document.getElementById("ar-level");
-const authorSelect = document.getElementById("author");
+const closeModal = document.querySelector(".close");
 
-// ====== 데이터 불러오기 =====
-fetch(sheetUrl)
-  .then(res => res.json())
-  .then(data => {
-    const values = data.values;
+let currentCategory = "readers";
+let books = [];
 
-    // 첫 줄이 헤더
-    const headers = values[0];
-    books = values.slice(1).map(row => {
+// CSV 파일 불러오기
+fetch("books.csv") // 경로 확인
+  .then(res => res.text())
+  .then(text => {
+    const lines = text.trim().split("\n");
+    const headers = lines[0].split(",");
+    books = lines.slice(1).map(line => {
+      const cols = line.split(",");
       let obj = {};
-      headers.forEach((h, i) => obj[h] = row[i] || "");
+      headers.forEach((h, i) => obj[h] = cols[i]);
       return obj;
     });
-
     renderBooks();
   })
-  .catch(err => console.error("Error fetching sheet:", err));
+  .catch(err => console.error("책 데이터 로드 실패:", err));
 
-// ====== 렌더링 함수 =====
+// 책 카드 렌더링
 function renderBooks() {
-  const arFilter = arSelect.value;
-  const authorFilter = authorSelect.value;
+  const arFilter = document.getElementById("ar-level").value;
+  const authorFilter = document.getElementById("author").value;
+
   bookGrid.innerHTML = "";
 
   books
-    .filter(b => b.category === currentCategory)
-    .filter(b => arFilter === "all" || b.ar == arFilter)
-    .filter(b => authorFilter === "all" || b.author === authorFilter)
+    .filter(book => book.category === currentCategory)
+    .filter(book => arFilter === "all" || book.ar == arFilter)
+    .filter(book => authorFilter === "all" || book.author === authorFilter)
     .forEach(book => {
       const card = document.createElement("div");
       card.className = "card";
@@ -57,10 +50,9 @@ function renderBooks() {
     });
 }
 
-// ====== 모달 =====
+// 모달 띄우기
 function showModal(book) {
   modalBody.innerHTML = `
-    <div class="close">X</div>
     <h2>${book.title}</h2>
     <p>AR 레벨: ${book.ar}</p>
     <p>리뷰: ${book.review}</p>
@@ -71,19 +63,21 @@ function showModal(book) {
     <img src="${book.img}" alt="${book.title}">
   `;
   modal.style.display = "flex";
-  modalBody.querySelector(".close").onclick = () => modal.style.display = "none";
 }
 
+closeModal.onclick = () => modal.style.display = "none";
 window.onclick = e => { if(e.target === modal) modal.style.display = "none"; };
 
+// 탭 클릭
 tabs.forEach(tab => {
   tab.onclick = () => {
     tabs.forEach(t => t.classList.remove("active"));
     tab.classList.add("active");
     currentCategory = tab.dataset.category;
     renderBooks();
-  };
+  }
 });
 
-arSelect.onchange = renderBooks;
-authorSelect.onchange = renderBooks;
+// 필터 변경
+document.getElementById("ar-level").onchange = renderBooks;
+document.getElementById("author").onchange = renderBooks;
