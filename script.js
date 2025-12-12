@@ -17,8 +17,9 @@ const detailPublisher = document.getElementById("detailPublisher");
 const detailISBN = document.getElementById("detailISBN");
 const detailDesc = document.getElementById("detailDesc");
 const detailImage = document.getElementById("detailImage");
-const prevBtn = document.getElementById("prevBtn");
-const nextBtn = document.getElementById("nextBtn");
+
+const arrowPrev = document.getElementById("arrowPrev");
+const arrowNext = document.getElementById("arrowNext");
 
 // CSV 불러오기
 Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.csv", {
@@ -67,7 +68,6 @@ function renderBooks() {
       const filterMin = parseInt(arValue, 10);
       const filterMax = arValue === "6" ? Infinity : filterMin + 0.9;
 
-      // 범위 겹침 체크
       return !(maxAR < filterMin || minAR > filterMax);
     });
   }
@@ -96,6 +96,7 @@ function openDetail(idx) {
   currentDetailIndex = idx;
   showDetail();
   modal.style.display = "flex";
+  updateArrows();
 }
 
 function showDetail() {
@@ -103,66 +104,39 @@ function showDetail() {
   if (!book) return;
 
   detailTitle.textContent = book["도서명"];
-
-  if (book["AR레벨"]) {
-    detailAR.textContent = book["AR레벨"];
-    detailAR.parentElement.style.display = "block";
-  } else {
-    detailAR.parentElement.style.display = "none";
-  }
-
-  if (book["리뷰"]) {
-    detailReview.textContent = book["리뷰"];
-    detailReview.parentElement.style.display = "block";
-  } else {
-    detailReview.parentElement.style.display = "none";
-  }
-
-  if (book["작가"]) {
-    detailAuthor.textContent = book["작가"];
-    detailAuthor.parentElement.style.display = "block";
-  } else {
-    detailAuthor.parentElement.style.display = "none";
-  }
-
-  if (book["출판사"]) {
-    detailPublisher.textContent = book["출판사"];
-    detailPublisher.parentElement.style.display = "block";
-  } else {
-    detailPublisher.parentElement.style.display = "none";
-  }
-
-  if (book["ISBN"]) {
-    detailISBN.textContent = book["ISBN"];
-    detailISBN.parentElement.style.display = "block";
-  } else {
-    detailISBN.parentElement.style.display = "none";
-  }
-
-  if (book["설명"]) {
-    detailDesc.innerHTML = book["설명"].replace(/\n/g, "<br>");
-    detailDesc.style.display = "block";
-  } else {
-    detailDesc.style.display = "none";
-  }
-
+  detailAR.textContent = book["AR레벨"] || "";
+  detailReview.textContent = book["리뷰"] || "";
+  detailAuthor.textContent = book["작가"] || "";
+  detailPublisher.textContent = book["출판사"] || "";
+  detailISBN.textContent = book["ISBN"] || "";
+  detailDesc.innerHTML = book["설명"] ? book["설명"].replace(/\n/g, "<br>") : "";
   detailImage.src = book["상세페이지"] || "";
+
+  updateArrows();
 }
 
-closeBtn.addEventListener("click", () => {
-  modal.style.display = "none";
+function updateArrows() {
+  arrowPrev.classList.toggle("hidden", currentDetailIndex === 0);
+  arrowNext.classList.toggle("hidden", currentDetailIndex === filteredBooks.length - 1);
+}
+
+closeBtn.addEventListener("click", () => { modal.style.display = "none"; });
+
+arrowPrev.addEventListener("click", () => {
+  if (currentDetailIndex > 0) { currentDetailIndex--; showDetail(); }
+});
+arrowNext.addEventListener("click", () => {
+  if (currentDetailIndex < filteredBooks.length - 1) { currentDetailIndex++; showDetail(); }
 });
 
-prevBtn.addEventListener("click", () => {
-  currentDetailIndex = (currentDetailIndex - 1 + filteredBooks.length) % filteredBooks.length;
-  showDetail();
+// 모바일 스와이프
+let startX = 0, endX = 0;
+detailImage.addEventListener("touchstart", e => { startX = e.touches[0].clientX; });
+detailImage.addEventListener("touchmove", e => { endX = e.touches[0].clientX; });
+detailImage.addEventListener("touchend", () => {
+  const diff = endX - startX;
+  if (diff > 50 && currentDetailIndex > 0) { currentDetailIndex--; showDetail(); }
+  else if (diff < -50 && currentDetailIndex < filteredBooks.length - 1) { currentDetailIndex++; showDetail(); }
 });
 
-nextBtn.addEventListener("click", () => {
-  currentDetailIndex = (currentDetailIndex + 1) % filteredBooks.length;
-  showDetail();
-});
-
-window.addEventListener("click", (e) => {
-  if (e.target === modal) modal.style.display = "none";
-});
+window.addEventListener("click", (e) => { if (e.target === modal) modal.style.display = "none"; });
