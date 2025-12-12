@@ -24,22 +24,16 @@ Papa.parse(csvPath, {
   }
 });
 
-// AR 레벨 필터만 채우기 (점대 단위)
+// AR 레벨 필터
 function populateFilters() {
   const arSelect = document.getElementById("ar-level");
-  const arSet = new Set();
+  arSelect.innerHTML = "";
 
-  books.forEach(b => {
-    if (b.ar) {
-      const major = Math.floor(parseFloat(b.ar));
-      if (!isNaN(major)) arSet.add(major);
-    }
-  });
-
-  Array.from(arSet).sort((a,b)=>a-b).forEach(major => {
+  const options = ["전체", "1점대", "2점대", "3점대", "4점대", "5점대", "6점대 이상"];
+  options.forEach(optText => {
     const opt = document.createElement("option");
-    opt.value = major;
-    opt.textContent = `${major}점대`;
+    opt.value = optText;
+    opt.textContent = optText;
     arSelect.appendChild(opt);
   });
 }
@@ -53,9 +47,20 @@ function renderBooks() {
     const categoryMatch = (b.category || "").trim() === currentCategory;
 
     let arMatch = true;
-    if (arFilter !== "all" && b.ar) {
-      const major = Math.floor(parseFloat(b.ar));
-      arMatch = major == arFilter;
+    if (arFilter !== "AR레벨" && b.ar) {
+      const ar = parseFloat(b.ar);
+      if (isNaN(ar)) return false;
+
+      const major = Math.floor(ar);
+      switch(arFilter) {
+        case "1점대": arMatch = major === 1; break;
+        case "2점대": arMatch = major === 2; break;
+        case "3점대": arMatch = major === 3; break;
+        case "4점대": arMatch = major === 4; break;
+        case "5점대": arMatch = major === 5; break;
+        case "6점대 이상": arMatch = major >= 6; break;
+        default: arMatch = true;
+      }
     }
 
     return categoryMatch && arMatch;
