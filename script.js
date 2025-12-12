@@ -8,7 +8,7 @@ let currentCategory = "readers";
 let books = [];
 
 // CSV 파일 불러오기
-fetch("books.csv") // 경로 확인
+fetch("도서추천목록.csv") // 경로 확인
   .then(res => res.text())
   .then(text => {
     const lines = text.trim().split("\n");
@@ -81,3 +81,4 @@ tabs.forEach(tab => {
 // 필터 변경
 document.getElementById("ar-level").onchange = renderBooks;
 document.getElementById("author").onchange = renderBooks;
+
