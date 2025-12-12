@@ -3,14 +3,14 @@ let currentCategory = "리더스";
 let filteredBooks = [];
 let currentDetailIndex = 0;
 
-// CSV 불러오기 (탭 구분)
+// CSV 불러오기
 Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.csv", {
   download: true,
   header: true,
-  delimiter: "\t", // 탭 구분
+  // ❗ 문제 원인: delimiter "\t" 제거함
   complete: function(results) {
-    books = results.data;
-    console.log(books); // 데이터 확인
+    books = results.data.filter(row => row["도서명"]); 
+    console.log(books); 
     renderBooks();
   }
 });
@@ -25,16 +25,18 @@ document.querySelectorAll(".tab").forEach(tab => {
   });
 });
 
-// AR 레벨 필터
+// AR 필터
 document.getElementById("arFilter").addEventListener("change", renderBooks);
 
 function renderBooks() {
   const arValue = document.getElementById("arFilter").value;
+
   filteredBooks = books.filter(book => book["카테고리"] === currentCategory);
 
   if (arValue !== "all") {
     filteredBooks = filteredBooks.filter(book => {
       let ar = parseFloat(book["AR레벨"]);
+      if (!ar) return false;  // AR값 없는 경우 제외
       if (arValue === "6") return ar >= 6;
       return Math.floor(ar) === Number(arValue);
     });
@@ -44,7 +46,6 @@ function renderBooks() {
   bookList.innerHTML = "";
 
   filteredBooks.forEach((book, index) => {
-    if (!book["도서명"]) return; // 안전 체크
     const card = document.createElement("div");
     card.className = "book-card";
     card.innerHTML = `
@@ -63,7 +64,7 @@ function renderBooks() {
 // 상세보기 모달
 const modal = document.getElementById("detailModal");
 const closeBtn = document.querySelector(".close");
-closeBtn.onclick = () => modal.style.display = "none";
+closeBtn.onclick = () => (modal.style.display = "none");
 
 function openDetail(index) {
   currentDetailIndex = index;
@@ -74,6 +75,7 @@ function openDetail(index) {
 function showDetail() {
   const book = filteredBooks[currentDetailIndex];
   if (!book) return;
+
   document.getElementById("detailTitle").textContent = book["도서명"];
   document.getElementById("detailAR").textContent = book["AR레벨"];
   document.getElementById("detailReview").textContent = book["리뷰"];
@@ -81,12 +83,15 @@ function showDetail() {
   document.getElementById("detailPublisher").textContent = book["출판사"];
   document.getElementById("detailISBN").textContent = book["ISBN"];
   document.getElementById("detailDesc").innerHTML = book["설명"] ? book["설명"].replace(/\n/g, "<br>") : '';
-  document.getElementById("detailImage").src = book["상세페이지"];
+
+  // 상세 이미지 (없을 수 있으므로 안전 처리)
+  document.getElementById("detailImage").src = book["상세페이지"] || "";
 }
 
 // 좌우 버튼
 document.getElementById("prevBtn").addEventListener("click", () => {
-  currentDetailIndex = (currentDetailIndex - 1 + filteredBooks.length) % filteredBooks.length;
+  currentDetailIndex =
+    (currentDetailIndex - 1 + filteredBooks.length) % filteredBooks.length;
   showDetail();
 });
 document.getElementById("nextBtn").addEventListener("click", () => {
@@ -94,9 +99,7 @@ document.getElementById("nextBtn").addEventListener("click", () => {
   showDetail();
 });
 
-// 모달 외부 클릭 시 닫기
-window.onclick = function(event) {
-  if (event.target == modal) {
-    modal.style.display = "none";
-  }
-}
+// 모달 외부 클릭 닫기
+window.onclick = function (event) {
+  if (event.target == modal) modal.style.display = "none";
+};
