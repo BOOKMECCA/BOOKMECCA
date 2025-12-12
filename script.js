@@ -7,10 +7,9 @@ let currentDetailIndex = 0;
 Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.csv", {
   download: true,
   header: true,
-  // ❗ 문제 원인: delimiter "\t" 제거함
   complete: function(results) {
     books = results.data.filter(row => row["도서명"]); 
-    console.log(books); 
+    console.log("Loaded books:", books);
     renderBooks();
   }
 });
@@ -36,7 +35,7 @@ function renderBooks() {
   if (arValue !== "all") {
     filteredBooks = filteredBooks.filter(book => {
       let ar = parseFloat(book["AR레벨"]);
-      if (!ar) return false;  // AR값 없는 경우 제외
+      if (!ar) return false;
       if (arValue === "6") return ar >= 6;
       return Math.floor(ar) === Number(arValue);
     });
@@ -54,14 +53,14 @@ function renderBooks() {
       <p>AR 레벨: ${book["AR레벨"]}</p>
       <p>리뷰: ${book["리뷰"]}</p>
       <p>작가명: ${book["작가"]}</p>
-      <p>${book["설명"] ? book["설명"].replace(/\n/g, "<br>") : ''}</p>
+      <p>${book["설명"] ? book["설명"].replace(/\\n/g, "<br>") : ""}</p>
     `;
     card.addEventListener("click", () => openDetail(index));
     bookList.appendChild(card);
   });
 }
 
-// 상세보기 모달
+// 상세 모달
 const modal = document.getElementById("detailModal");
 const closeBtn = document.querySelector(".close");
 closeBtn.onclick = () => (modal.style.display = "none");
@@ -82,9 +81,9 @@ function showDetail() {
   document.getElementById("detailAuthor").textContent = book["작가"];
   document.getElementById("detailPublisher").textContent = book["출판사"];
   document.getElementById("detailISBN").textContent = book["ISBN"];
-  document.getElementById("detailDesc").innerHTML = book["설명"] ? book["설명"].replace(/\n/g, "<br>") : '';
+  document.getElementById("detailDesc").innerHTML =
+    book["설명"] ? book["설명"].replace(/\\n/g, "<br>") : "";
 
-  // 상세 이미지 (없을 수 있으므로 안전 처리)
   document.getElementById("detailImage").src = book["상세페이지"] || "";
 }
 
@@ -99,7 +98,7 @@ document.getElementById("nextBtn").addEventListener("click", () => {
   showDetail();
 });
 
-// 모달 외부 클릭 닫기
+// 모달 외부 클릭 시 닫기
 window.onclick = function (event) {
   if (event.target == modal) modal.style.display = "none";
 };
