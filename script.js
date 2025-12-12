@@ -66,7 +66,7 @@ function renderBooks() {
       }
 
       const filterMin = parseInt(arValue, 10);
-      const filterMax = arValue === "6" ? Infinity : filterMin + 0.9;
+      const filterMax = arValue === "6" ? Infinity : filterMin + 1 - 0.0001; // 수정됨
 
       // 범위 겹침 체크
       return !(maxAR < filterMin || minAR > filterMax);
