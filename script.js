@@ -3,12 +3,14 @@ let currentCategory = "리더스";
 let filteredBooks = [];
 let currentDetailIndex = 0;
 
-// CSV 불러오기
+// CSV 불러오기 (탭 구분)
 Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.csv", {
   download: true,
   header: true,
+  delimiter: "\t", // 탭 구분
   complete: function(results) {
     books = results.data;
+    console.log(books); // 데이터 확인
     renderBooks();
   }
 });
@@ -32,10 +34,9 @@ function renderBooks() {
 
   if (arValue !== "all") {
     filteredBooks = filteredBooks.filter(book => {
-      let ar = book["AR레벨"];
-      let num = parseFloat(ar);
-      if (arValue === "6") return num >= 6;
-      return Math.floor(num) === Number(arValue);
+      let ar = parseFloat(book["AR레벨"]);
+      if (arValue === "6") return ar >= 6;
+      return Math.floor(ar) === Number(arValue);
     });
   }
 
@@ -43,6 +44,7 @@ function renderBooks() {
   bookList.innerHTML = "";
 
   filteredBooks.forEach((book, index) => {
+    if (!book["도서명"]) return; // 안전 체크
     const card = document.createElement("div");
     card.className = "book-card";
     card.innerHTML = `
@@ -51,7 +53,7 @@ function renderBooks() {
       <p>AR 레벨: ${book["AR레벨"]}</p>
       <p>리뷰: ${book["리뷰"]}</p>
       <p>작가명: ${book["작가"]}</p>
-      <p>${book["설명"]}</p>
+      <p>${book["설명"] ? book["설명"].replace(/\n/g, "<br>") : ''}</p>
     `;
     card.addEventListener("click", () => openDetail(index));
     bookList.appendChild(card);
@@ -78,7 +80,7 @@ function showDetail() {
   document.getElementById("detailAuthor").textContent = book["작가"];
   document.getElementById("detailPublisher").textContent = book["출판사"];
   document.getElementById("detailISBN").textContent = book["ISBN"];
-  document.getElementById("detailDesc").textContent = book["설명"];
+  document.getElementById("detailDesc").innerHTML = book["설명"] ? book["설명"].replace(/\n/g, "<br>") : '';
   document.getElementById("detailImage").src = book["상세페이지"];
 }
 
