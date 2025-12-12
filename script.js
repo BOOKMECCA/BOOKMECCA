@@ -9,14 +9,13 @@ let books = [];
 // CSV 파일 경로
 const csvPath = "booklist.csv";
 
+// CSV 파싱
 Papa.parse(csvPath, {
   download: true,
   header: true,
   skipEmptyLines: true,
   complete: function(results) {
-    console.log("CSV 파싱 완료:", results.data);
     books = results.data.filter(b => Object.values(b).some(v => v && v.trim() !== ""));
-
     populateFilters();
     renderBooks();
   },
@@ -25,45 +24,41 @@ Papa.parse(csvPath, {
   }
 });
 
+// AR 레벨 필터만 채우기 (점대 단위)
 function populateFilters() {
   const arSelect = document.getElementById("ar-level");
-  const authorSelect = document.getElementById("author");
-
   const arSet = new Set();
-  const authSet = new Set();
 
   books.forEach(b => {
-    if (b.ar && b.ar.trim() !== "") arSet.add(b.ar.trim());
-    if (b.author && b.author.trim() !== "") authSet.add(b.author.trim());
+    if (b.ar) {
+      const major = Math.floor(parseFloat(b.ar));
+      if (!isNaN(major)) arSet.add(major);
+    }
   });
 
-  Array.from(arSet).sort().forEach(ar => {
+  Array.from(arSet).sort((a,b)=>a-b).forEach(major => {
     const opt = document.createElement("option");
-    opt.value = ar;
-    opt.textContent = ar;
+    opt.value = major;
+    opt.textContent = `${major}점대`;
     arSelect.appendChild(opt);
-  });
-
-  Array.from(authSet).sort().forEach(author => {
-    const opt = document.createElement("option");
-    opt.value = author;
-    opt.textContent = author;
-    authorSelect.appendChild(opt);
   });
 }
 
+// 카드 렌더링
 function renderBooks() {
   const arFilter = document.getElementById("ar-level").value;
-  const authorFilter = document.getElementById("author").value;
-
   bookGrid.innerHTML = "";
 
   const filteredBooks = books.filter(b => {
-    const bookCat = (b.category || "").trim();
-    const categoryMatch = bookCat === currentCategory;
-    const arMatch = arFilter === "all" || (b.ar && b.ar.trim() === arFilter);
-    const authorMatch = authorFilter === "all" || (b.author && b.author.trim() === authorFilter);
-    return categoryMatch && arMatch && authorMatch;
+    const categoryMatch = (b.category || "").trim() === currentCategory;
+
+    let arMatch = true;
+    if (arFilter !== "all" && b.ar) {
+      const major = Math.floor(parseFloat(b.ar));
+      arMatch = major == arFilter;
+    }
+
+    return categoryMatch && arMatch;
   });
 
   if (filteredBooks.length === 0) {
@@ -87,6 +82,7 @@ function renderBooks() {
   });
 }
 
+// 모달
 function showModal(book) {
   modalBody.innerHTML = `
     <div class="close">X</div>
@@ -106,10 +102,10 @@ function showModal(book) {
   if (closeBtn) closeBtn.onclick = () => { modal.style.display = "none"; };
 }
 
-window.onclick = e => {
-  if (e.target === modal) modal.style.display = "none";
-};
+// 모달 외부 클릭 시 닫기
+window.onclick = e => { if(e.target === modal) modal.style.display = "none"; };
 
+// 탭 클릭
 tabs.forEach(tab => {
   tab.onclick = () => {
     tabs.forEach(t => t.classList.remove("active"));
@@ -119,5 +115,5 @@ tabs.forEach(tab => {
   };
 });
 
+// AR 필터 변경 시
 document.getElementById("ar-level").onchange = renderBooks;
-document.getElementById("author").onchange = renderBooks;
