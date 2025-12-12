@@ -3,8 +3,8 @@ let currentCategory = "리더스";
 let filteredBooks = [];
 let currentDetailIndex = 0;
 
-// CSV 불러오기
-Papa.parse("books.csv", {
+// CSV 불러오기 (GitHub Pages용 절대경로)
+Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/books.csv", {
   download: true,
   header: true,
   complete: function(results) {
@@ -56,7 +56,7 @@ function renderBooks() {
   });
 }
 
-// 상세보기
+// 상세보기 모달
 const modal = document.getElementById("detailModal");
 const closeBtn = document.querySelector(".close");
 closeBtn.onclick = () => modal.style.display = "none";
@@ -69,6 +69,7 @@ function openDetail(index) {
 
 function showDetail() {
   const book = filteredBooks[currentDetailIndex];
+  if (!book) return;
   document.getElementById("detailTitle").textContent = book.title;
   document.getElementById("detailAR").textContent = book.ar_level;
   document.getElementById("detailReview").textContent = book.amazon_review;
