@@ -2,8 +2,8 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BOOKMECCA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>추천 도서 목록</title>
   <style>
     * { box-sizing: border-box; }
     body { font-family: Arial, sans-serif; margin:0; padding:10px; }
@@ -48,8 +48,8 @@
       display: block;
       margin-bottom: 8px;
     }
-    .book-card h3 { margin: 0 0 8px 0; font-size: 1.1rem; }
-    .book-card p { margin: 2px 0; font-size: 0.9rem; color: #444; }
+    .book-card h3 { margin:0 0 8px 0; font-size:1.1rem; }
+    .book-card p { margin:2px 0; font-size:0.9rem; color:#444; }
 
     .modal {
       display: none;
@@ -59,17 +59,17 @@
       justify-content: center;
       align-items: center;
       z-index: 999;
-      overflow-y: auto;
-      padding: 20px;
     }
     .modal-content {
       background: white;
       max-width: 480px;
-      width: 100%;
+      width: 90%;
       padding: 20px;
       position: relative;
       border-radius: 4px;
       box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      overflow-y: auto;
+      max-height: 90%;
     }
     .close {
       position: absolute;
@@ -90,6 +90,7 @@
       user-select: none;
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 </head>
 <body>
   <h1>추천 도서 목록</h1>
@@ -121,29 +122,31 @@
       <h2 id="detailTitle"></h2>
       <p>AR 레벨: <span id="detailAR"></span></p>
       <p>리뷰: <span id="detailReview"></span></p>
-      <p>작가: <span id="detailAuthor"></span></p>
+      <p>작가명: <span id="detailAuthor"></span></p>
       <p>출판사: <span id="detailPublisher"></span></p>
       <p>ISBN: <span id="detailISBN"></span></p>
       <p id="detailDesc"></p>
-      <img id="detailImage" src="" alt="">
+      <img id="detailImage" src="" alt="상세 이미지" />
       <button id="prevBtn">◀ 이전</button>
       <button id="nextBtn">다음 ▶</button>
     </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script>
     let books = [];
     let currentCategory = "리더스";
     let filteredBooks = [];
     let currentDetailIndex = 0;
 
+    // CSV 로딩
     Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.csv", {
-      download:true,
-      header:true,
-      delimiter:"\t",
+      download: true,
+      header: true,
+      delimiter: "\t",
+      skipEmptyLines: true,
       complete: function(results){
-        books = results.data.map(book => {
+        // 빈 도서명 제거 + http -> https
+        books = results.data.filter(b => b["도서명"]).map(book => {
           book["메인"] = book["메인"] ? book["메인"].replace(/^http:/,"https:") : "";
           book["상세페이지"] = book["상세페이지"] ? book["상세페이지"].replace(/^http:/,"https:") : "";
           return book;
@@ -152,6 +155,7 @@
       }
     });
 
+    // 탭 클릭
     document.querySelectorAll(".tab").forEach(tab => {
       tab.addEventListener("click", (e) => {
         document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
@@ -161,6 +165,7 @@
       });
     });
 
+    // AR 필터
     document.getElementById("arFilter").addEventListener("change", renderBooks);
 
     function renderBooks(){
@@ -180,24 +185,24 @@
       bookList.innerHTML = "";
 
       filteredBooks.forEach((book,index)=>{
-        if(!book["도서명"]) return;
         const card = document.createElement("div");
         card.className="book-card";
         card.innerHTML=`
           <img src="${book["메인"]}" alt="${book["도서명"]}">
           <h3>${book["도서명"]}</h3>
-          <p>AR 레벨: ${book["AR레벨"] || '-'}</p>
-          <p>리뷰: ${book["리뷰"] || '-'}</p>
-          <p>작가: ${book["작가"] || '-'}</p>
+          <p>AR 레벨: ${book["AR레벨"] || "-"}</p>
+          <p>리뷰: ${book["리뷰"] || "-"}</p>
+          <p>작가명: ${book["작가"] || "-"}</p>
           <p>${book["설명"] ? book["설명"].replace(/\n/g,"<br>") : ''}</p>
         `;
         card.addEventListener("click",()=>openDetail(index));
         bookList.appendChild(card);
 
-        book["_detailImage"] = book["상세페이지"] || book["메인"];
+        book["_detailImage"] = book["상세페이지"];
       });
     }
 
+    // 모달
     const modal = document.getElementById("detailModal");
     const closeBtn = document.querySelector(".close");
     closeBtn.onclick = ()=> modal.style.display="none";
@@ -212,13 +217,13 @@
       const book = filteredBooks[currentDetailIndex];
       if(!book) return;
       document.getElementById("detailTitle").textContent = book["도서명"];
-      document.getElementById("detailAR").textContent = book["AR레벨"] || '-';
-      document.getElementById("detailReview").textContent = book["리뷰"] || '-';
-      document.getElementById("detailAuthor").textContent = book["작가"] || '-';
-      document.getElementById("detailPublisher").textContent = book["출판사"] || '-';
-      document.getElementById("detailISBN").textContent = book["ISBN"] || '-';
+      document.getElementById("detailAR").textContent = book["AR레벨"] || "-";
+      document.getElementById("detailReview").textContent = book["리뷰"] || "-";
+      document.getElementById("detailAuthor").textContent = book["작가"] || "-";
+      document.getElementById("detailPublisher").textContent = book["출판사"] || "-";
+      document.getElementById("detailISBN").textContent = book["ISBN"] || "-";
       document.getElementById("detailDesc").innerHTML = book["설명"] ? book["설명"].replace(/\n/g,"<br>") : '';
-      document.getElementById("detailImage").src = book["_detailImage"];
+      document.getElementById("detailImage").src = book["_detailImage"] || "";
     }
 
     document.getElementById("prevBtn").addEventListener("click",()=>{
