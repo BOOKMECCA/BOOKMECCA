@@ -72,37 +72,46 @@
       max-height: 90%;
     }
     .close {
-      position: fixed; /* 상단 고정 */
+      position: absolute;
       top: 10px; right: 10px;
       font-size: 24px;
       cursor: pointer;
       user-select: none;
-      z-index: 1000;
     }
     #detailImage { width: 100%; margin-top: 12px; }
-
-    /* 이전/다음 화살표 */
-    .arrow-btn {
-      position: fixed;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 36px;
-      color: rgba(255,255,255,0.6);
-      background: rgba(0,0,0,0.2);
-      border: none;
+    #prevBtn, #nextBtn {
+      margin-top: 10px;
+      padding: 6px 12px;
       cursor: pointer;
-      padding: 10px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 3px;
       user-select: none;
-      z-index: 1000;
     }
-    #arrowPrev { left: 10px; }
-    #arrowNext { right: 10px; }
 
-    .hidden { display: none; }
+    /* 검색창 + 바코드 버튼 */
+    #searchInput { padding:5px; flex:1; }
+    #barcodeBtn { padding:5px 10px; cursor:pointer; }
+    #barcodeScanner {
+      display:none;
+      position:fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      background: rgba(0,0,0,0.7);
+      z-index:1000;
+    }
   </style>
 </head>
 <body>
   <h1>추천 도서 목록</h1>
+
+  <!-- 검색창 + 바코드 버튼 -->
+  <div style="display:flex; gap:8px; margin-bottom:10px;">
+    <input type="text" id="searchInput" placeholder="도서명 검색..."/>
+    <button id="barcodeBtn">📷 바코드 스캔</button>
+  </div>
+  <div id="barcodeScanner"></div>
 
   <label for="arFilter">AR 레벨:</label>
   <select id="arFilter">
@@ -130,20 +139,17 @@
       <span class="close">&times;</span>
       <h2 id="detailTitle"></h2>
       <p>AR 레벨: <span id="detailAR"></span></p>
-      <p>리뷰: <span id="detailReview"></span></p>
-      <p>작가명: <span id="detailAuthor"></span></p>
       <p>출판사: <span id="detailPublisher"></span></p>
       <p>ISBN: <span id="detailISBN"></span></p>
       <p id="detailDesc"></p>
       <img id="detailImage" src="" alt="상세 이미지" />
+      <button id="prevBtn">◀ 이전</button>
+      <button id="nextBtn">다음 ▶</button>
     </div>
   </div>
 
-  <!-- 반투명 화살표 버튼 -->
-  <button id="arrowPrev" class="arrow-btn hidden">&lt;</button>
-  <button id="arrowNext" class="arrow-btn hidden">&gt;</button>
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="script.js"></script>
 </body>
 </html>
