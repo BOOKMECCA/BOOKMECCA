@@ -97,4 +97,49 @@
 
     .close {
       position: absolute;
-      top: 10p
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="header">
+    <img src="logo.png" id="logo" alt="logo">
+    <span id="homeBtn">🏠</span>
+    <h1>추천 도서 목록</h1>
+  </div>
+
+  <div id="searchContainer">
+    <input id="searchInput" placeholder="검색어 입력" />
+    <button id="searchBtn">검색</button>
+  </div>
+
+  <div id="tabs">
+    <button class="tab active" data-category="리더스">리더스</button>
+    <button class="tab" data-category="챕터북">챕터북</button>
+    <button class="tab" data-category="스토리북">스토리북</button>
+    <button class="tab" data-category="논픽션">논픽션</button>
+    <button class="tab" data-category="대표상품">대표상품</button>
+  </div>
+
+  <div id="bookList" class="book-list"></div>
+
+  <div id="detailModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2 id="detailTitle"></h2>
+      <p>AR: <span id="detailAR"></span></p>
+      <p>출판사: <span id="detailPublisher"></span></p>
+      <p>ISBN: <span id="detailISBN"></span></p>
+      <p id="detailDesc"></p>
+      <img id="detailImage" />
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
