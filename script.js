@@ -11,15 +11,16 @@ const closeBtn = modal.querySelector(".close");
 
 const detailTitle = document.getElementById("detailTitle");
 const detailAR = document.getElementById("detailAR");
-const detailReview = document.getElementById("detailReview");
-const detailAuthor = document.getElementById("detailAuthor");
 const detailPublisher = document.getElementById("detailPublisher");
 const detailISBN = document.getElementById("detailISBN");
 const detailDesc = document.getElementById("detailDesc");
 const detailImage = document.getElementById("detailImage");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
 
-const arrowPrev = document.getElementById("arrowPrev");
-const arrowNext = document.getElementById("arrowNext");
+const searchInput = document.getElementById("searchInput");
+const barcodeBtn = document.getElementById("barcodeBtn");
+const barcodeScanner = document.getElementById("barcodeScanner");
 
 // CSV 불러오기
 Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.csv", {
@@ -44,6 +45,11 @@ tabs.forEach(tab => {
 
 // AR 필터 변경 이벤트
 arFilter.addEventListener("change", () => {
+  renderBooks();
+});
+
+// 검색 기능
+searchInput.addEventListener("input", () => {
   renderBooks();
 });
 
@@ -72,6 +78,14 @@ function renderBooks() {
     });
   }
 
+  // 검색 필터
+  const searchTerm = searchInput.value.toLowerCase();
+  if (searchTerm) {
+    filteredBooks = filteredBooks.filter(book =>
+      book["도서명"].toLowerCase().includes(searchTerm)
+    );
+  }
+
   bookList.innerHTML = "";
 
   filteredBooks.forEach((book, idx) => {
@@ -80,8 +94,6 @@ function renderBooks() {
     let cardHTML = `<img src="${book["메인"]}" alt="${book["도서명"]}" />
                     <h3>${book["도서명"]}</h3>`;
     if (book["AR레벨"]) cardHTML += `<p>AR 레벨: ${book["AR레벨"]}</p>`;
-    if (book["리뷰"]) cardHTML += `<p>리뷰: ${book["리뷰"]}</p>`;
-    if (book["작가"]) cardHTML += `<p>작가명: ${book["작가"]}</p>`;
     if (book["설명"]) cardHTML += `<p>${book["설명"].replace(/\n/g, "<br>")}</p>`;
 
     const card = document.createElement("div");
@@ -96,7 +108,6 @@ function openDetail(idx) {
   currentDetailIndex = idx;
   showDetail();
   modal.style.display = "flex";
-  updateArrows();
 }
 
 function showDetail() {
@@ -104,39 +115,68 @@ function showDetail() {
   if (!book) return;
 
   detailTitle.textContent = book["도서명"];
-  detailAR.textContent = book["AR레벨"] || "";
-  detailReview.textContent = book["리뷰"] || "";
-  detailAuthor.textContent = book["작가"] || "";
-  detailPublisher.textContent = book["출판사"] || "";
-  detailISBN.textContent = book["ISBN"] || "";
-  detailDesc.innerHTML = book["설명"] ? book["설명"].replace(/\n/g, "<br>") : "";
+
+  if (book["AR레벨"]) {
+    detailAR.textContent = book["AR레벨"];
+    detailAR.parentElement.style.display = "block";
+  } else detailAR.parentElement.style.display = "none";
+
+  if (book["출판사"]) {
+    detailPublisher.textContent = book["출판사"];
+    detailPublisher.parentElement.style.display = "block";
+  } else detailPublisher.parentElement.style.display = "none";
+
+  if (book["ISBN"]) {
+    detailISBN.textContent = book["ISBN"];
+    detailISBN.parentElement.style.display = "block";
+  } else detailISBN.parentElement.style.display = "none";
+
+  if (book["설명"]) {
+    detailDesc.innerHTML = book["설명"].replace(/\n/g, "<br>");
+    detailDesc.style.display = "block";
+  } else detailDesc.style.display = "none";
+
   detailImage.src = book["상세페이지"] || "";
-
-  updateArrows();
 }
 
-function updateArrows() {
-  arrowPrev.classList.toggle("hidden", currentDetailIndex === 0);
-  arrowNext.classList.toggle("hidden", currentDetailIndex === filteredBooks.length - 1);
-}
-
-closeBtn.addEventListener("click", () => { modal.style.display = "none"; });
-
-arrowPrev.addEventListener("click", () => {
-  if (currentDetailIndex > 0) { currentDetailIndex--; showDetail(); }
-});
-arrowNext.addEventListener("click", () => {
-  if (currentDetailIndex < filteredBooks.length - 1) { currentDetailIndex++; showDetail(); }
+closeBtn.addEventListener("click", () => {
+  modal.style.display = "none";
 });
 
-// 모바일 스와이프
-let startX = 0, endX = 0;
-detailImage.addEventListener("touchstart", e => { startX = e.touches[0].clientX; });
-detailImage.addEventListener("touchmove", e => { endX = e.touches[0].clientX; });
-detailImage.addEventListener("touchend", () => {
-  const diff = endX - startX;
-  if (diff > 50 && currentDetailIndex > 0) { currentDetailIndex--; showDetail(); }
-  else if (diff < -50 && currentDetailIndex < filteredBooks.length - 1) { currentDetailIndex++; showDetail(); }
+prevBtn.addEventListener("click", () => {
+  currentDetailIndex = (currentDetailIndex - 1 + filteredBooks.length) % filteredBooks.length;
+  showDetail();
 });
 
-window.addEventListener("click", (e) => { if (e.target === modal) modal.style.display = "none"; });
+nextBtn.addEventListener("click", () => {
+  currentDetailIndex = (currentDetailIndex + 1) % filteredBooks.length;
+  showDetail();
+});
+
+window.addEventListener("click", (e) => {
+  if (e.target === modal) modal.style.display = "none";
+});
+
+// 바코드 스캔 기능 (html5-qrcode 사용)
+barcodeBtn.addEventListener("click", () => {
+  barcodeScanner.style.display = "block";
+
+  const html5QrCode = new Html5Qrcode("barcodeScanner");
+  Html5Qrcode.getCameras().then(cameras => {
+    if (cameras && cameras.length) {
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        (decodedText) => {
+          const idx = books.findIndex(book => book["ISBN"] === decodedText);
+          if (idx !== -1) openDetail(idx);
+
+          html5QrCode.stop().then(() => {
+            barcodeScanner.style.display = "none";
+          });
+        },
+        (errorMessage) => { /* 스캔 중 오류 무시 */ }
+      );
+    }
+  }).catch(err => console.error(err));
+});
