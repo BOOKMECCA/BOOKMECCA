@@ -129,14 +129,8 @@ arrowNext.addEventListener("click", () => {
   if (currentDetailIndex < filteredBooks.length - 1) { currentDetailIndex++; showDetail(); }
 });
 
-// 모바일 스와이프
-let startX = 0, endX = 0;
-detailImage.addEventListener("touchstart", e => { startX = e.touches[0].clientX; });
-detailImage.addEventListener("touchmove", e => { endX = e.touches[0].clientX; });
-detailImage.addEventListener("touchend", () => {
-  const diff = endX - startX;
-  if (diff > 50 && currentDetailIndex > 0) { currentDetailIndex--; showDetail(); }
-  else if (diff < -50 && currentDetailIndex < filteredBooks.length - 1) { currentDetailIndex++; showDetail(); }
-});
+// **모바일 스와이프 제거됨**
 
-window.addEventListener("click", (e) => { if (e.target === modal) modal.style.display = "none"; });
+window.addEventListener("click", (e) => { 
+  if (e.target === modal) modal.style.display = "none"; 
+});
