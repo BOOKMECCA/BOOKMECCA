@@ -70,9 +70,21 @@
       background: white;
     }
 
+    /* ✅ 썸네일 이미지 (반응형 고려) */
     .book-card img {
       width: 100%;
+      max-height: 220px;          /* PC에서 과도하게 커지는 것 방지 */
+      object-fit: contain;       /* 비율 유지 */
+      background: #f5f5f5;
+      display: block;
       margin-bottom: 8px;
+    }
+
+    /* 모바일에서는 살짝 더 작게 */
+    @media (max-width: 768px) {
+      .book-card img {
+        max-height: 180px;
+      }
     }
 
     .modal {
@@ -93,6 +105,24 @@
       position: relative;
       max-height: 90%;
       overflow-y: auto;
+    }
+
+    /* ✅ 상세 이미지 (PC / 모바일 공통 반응형) */
+    #detailImage {
+      width: 100%;
+      max-width: 100%;
+      max-height: 60vh;          /* 화면 기준 제한 */
+      object-fit: contain;      /* 확대 / 잘림 방지 */
+      display: block;
+      margin: 10px auto 0;
+      background: #f5f5f5;
+    }
+
+    /* 모바일에서는 조금 더 여유 */
+    @media (max-width: 768px) {
+      #detailImage {
+        max-height: 50vh;
+      }
     }
 
     .close {
