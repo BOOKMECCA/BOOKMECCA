@@ -23,7 +23,7 @@ const detailISBN = document.getElementById("detailISBN");
 const detailDesc = document.getElementById("detailDesc");
 const detailImage = document.getElementById("detailImage");
 
-/* CSV */
+/* CSV 로딩 – 절대 수정 안 함 */
 Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.csv", {
   download: true,
   header: true,
@@ -59,7 +59,7 @@ function doSearch() {
   renderBooks();
 }
 
-/* 홈 복귀 (PC / 모바일 동일) */
+/* 홈 */
 function goHome() {
   isSearchMode = false;
   searchInput.value = "";
@@ -75,22 +75,33 @@ function goHome() {
 logo.addEventListener("click", goHome);
 homeBtn.addEventListener("click", goHome);
 
-/* 렌더 */
+/* 🔥 핵심 수정된 렌더 함수 */
 function renderBooks() {
-  if (isSearchMode) {
-    const term = searchInput.value.toLowerCase();
+
+  const searchTerm = searchInput.value.trim().toLowerCase();
+
+  if (isSearchMode && searchTerm !== "") {
+
+    const SEARCH_KEYS = ["도서명", "작가", "출판사", "ISBN", "설명"];
 
     filteredBooks = books.filter(book =>
-      ["도서명", "작가", "출판사", "ISBN", "설명"]
-        .some(k => book[k] && book[k].toLowerCase().includes(term))
+      SEARCH_KEYS.some(key =>
+        book[key] &&
+        book[key].toString().toLowerCase().includes(searchTerm)
+      )
     );
+
   } else {
-    filteredBooks = books.filter(b => b["카테고리"] === currentCategory);
+    filteredBooks = books.filter(
+      book => book["카테고리"] === currentCategory
+    );
   }
 
   bookList.innerHTML = "";
 
-  filteredBooks.forEach((book, i) => {
+  filteredBooks.forEach((book, idx) => {
+    if (!book["도서명"]) return;
+
     const card = document.createElement("div");
     card.className = "book-card";
     card.innerHTML = `
@@ -98,7 +109,7 @@ function renderBooks() {
       <h3>${book["도서명"]}</h3>
       <p>${book["설명"] || ""}</p>
     `;
-    card.onclick = () => openDetail(i);
+    card.onclick = () => openDetail(idx);
     bookList.appendChild(card);
   });
 }
