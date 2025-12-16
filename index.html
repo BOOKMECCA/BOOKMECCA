@@ -71,19 +71,23 @@
       overflow-y: auto;
       max-height: 90%;
     }
+
+    /* 닫기 버튼: 모달 안에, 스크롤과 상관없이 항상 보임 */
     .close {
-      position: absolute; /* 모달 안에 고정 */
-      top: 10px; right: 10px;
+      position: fixed;
+      top: 10px; 
+      right: 10px;
       font-size: 24px;
       cursor: pointer;
       user-select: none;
       z-index: 1000;
     }
+
     #detailImage { width: 100%; margin-top: 12px; }
 
-    /* 이전/다음 화살표 모달 안으로 이동 */
+    /* 이전/다음 화살표: 항상 보임 */
     .arrow-btn {
-      position: absolute; /* 모달 내부에서 위치 */
+      position: fixed; 
       top: 50%;
       transform: translateY(-50%);
       font-size: 36px;
@@ -95,8 +99,8 @@
       user-select: none;
       z-index: 1000;
     }
-    #arrowPrev { left: 5px; }
-    #arrowNext { right: 5px; }
+    #arrowPrev { left: 10px; }
+    #arrowNext { right: 10px; }
 
     .hidden { display: none; }
   </style>
@@ -127,20 +131,16 @@
 
   <div id="detailModal" class="modal">
     <div class="modal-content">
-      <span class="close">&times;</span>
       <h2 id="detailTitle"></h2>
       <p>AR 레벨: <span id="detailAR"></span></p>
-      <p>리뷰: <span id="detailReview"></span></p>
-      <p>작가명: <span id="detailAuthor"></span></p>
-      <p>출판사: <span id="detailPublisher"></span></p>
-      <p>ISBN: <span id="detailISBN"></span></p>
       <p id="detailDesc"></p>
       <img id="detailImage" src="" alt="상세 이미지" />
-
-      <!-- 모달 안으로 화살표 이동 -->
-      <button id="arrowPrev" class="arrow-btn hidden">&lt;</button>
-      <button id="arrowNext" class="arrow-btn hidden">&gt;</button>
     </div>
+
+    <!-- 모달 밖이 아닌 내부지만 항상 보이는 위치로 fixed -->
+    <span class="close">&times;</span>
+    <button id="arrowPrev" class="arrow-btn hidden">&lt;</button>
+    <button id="arrowNext" class="arrow-btn hidden">&gt;</button>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
