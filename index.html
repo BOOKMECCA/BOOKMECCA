@@ -72,7 +72,7 @@
       max-height: 90%;
     }
     .close {
-      position: fixed; /* 상단 고정 */
+      position: absolute; /* 모달 안에 고정 */
       top: 10px; right: 10px;
       font-size: 24px;
       cursor: pointer;
@@ -81,9 +81,9 @@
     }
     #detailImage { width: 100%; margin-top: 12px; }
 
-    /* 이전/다음 화살표 */
+    /* 이전/다음 화살표 모달 안으로 이동 */
     .arrow-btn {
-      position: fixed;
+      position: absolute; /* 모달 내부에서 위치 */
       top: 50%;
       transform: translateY(-50%);
       font-size: 36px;
@@ -95,8 +95,8 @@
       user-select: none;
       z-index: 1000;
     }
-    #arrowPrev { left: 10px; }
-    #arrowNext { right: 10px; }
+    #arrowPrev { left: 5px; }
+    #arrowNext { right: 5px; }
 
     .hidden { display: none; }
   </style>
@@ -136,12 +136,12 @@
       <p>ISBN: <span id="detailISBN"></span></p>
       <p id="detailDesc"></p>
       <img id="detailImage" src="" alt="상세 이미지" />
+
+      <!-- 모달 안으로 화살표 이동 -->
+      <button id="arrowPrev" class="arrow-btn hidden">&lt;</button>
+      <button id="arrowNext" class="arrow-btn hidden">&gt;</button>
     </div>
   </div>
-
-  <!-- 반투명 화살표 버튼 -->
-  <button id="arrowPrev" class="arrow-btn hidden">&lt;</button>
-  <button id="arrowNext" class="arrow-btn hidden">&gt;</button>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="script.js"></script>
