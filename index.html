@@ -7,11 +7,17 @@
   <style>
     * { box-sizing: border-box; }
     body { font-family: Arial, sans-serif; margin:0; padding:10px; }
-    h1 { margin-bottom: 20px; }
+    h1 { margin:0; }
 
-    #searchContainer { margin-bottom: 10px; display: flex; gap: 6px; }
-    #searchInput { flex: 1; padding: 6px; font-size: 1rem; }
-    #searchBtn, #barcodeBtn { padding: 6px 12px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 3px; }
+    #header {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:10px;
+    }
+
+    #header img { height:40px; }
+    #homeBtn img { height:30px; cursor:pointer; }
 
     #arFilter { margin-bottom: 10px; }
 
@@ -94,19 +100,29 @@
       user-select: none;
     }
 
-    /* 바코드 스캔 영역 */
-    #barcodeScanner { display: none; width: 100%; height: 300px; margin-top: 10px; }
+    #searchContainer {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    #searchInput { flex:1; padding:5px; }
+    #searchBtn { padding:5px 10px; cursor:pointer; }
   </style>
 </head>
 <body>
-  <h1>추천 도서 목록</h1>
+
+  <div id="header">
+    <img src="logo.png" alt="LOGO" />
+    <button id="homeBtn">
+      <img src="home-icon.png" alt="홈" />
+    </button>
+    <h1>추천 도서 목록</h1>
+  </div>
 
   <div id="searchContainer">
-    <input type="text" id="searchInput" placeholder="검색어를 입력하세요" />
+    <input type="text" id="searchInput" placeholder="검색어 입력..." />
     <button id="searchBtn">검색</button>
-    <button id="barcodeBtn">바코드 스캔</button>
   </div>
-  <div id="barcodeScanner"></div>
 
   <label for="arFilter">AR 레벨:</label>
   <select id="arFilter">
@@ -144,7 +160,6 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
