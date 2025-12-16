@@ -47,26 +47,23 @@ tabs.forEach(tab => {
   });
 });
 
-// AR 필터 변경 이벤트
-arFilter.addEventListener("change", () => {
-  renderBooks();
-});
+// AR 필터 변경
+arFilter.addEventListener("change", renderBooks);
 
-// 검색 버튼 클릭 이벤트
+// 검색 버튼 클릭
 searchBtn.addEventListener("click", () => {
+  if (!searchInput.value.trim()) return;
   isSearchMode = true;
   document.getElementById("tabs").style.display = "none";
   renderBooks();
 });
 
-// 엔터 키 입력 시 검색
+// 엔터 키 검색
 searchInput.addEventListener("keyup", (e) => {
-  if (e.key === "Enter") {
-    searchBtn.click();
-  }
+  if (e.key === "Enter") searchBtn.click();
 });
 
-// 로고 클릭 / 홈 버튼 클릭 → 원래 상태
+// 로고 / 홈 클릭 → 홈 복귀
 function goHome() {
   isSearchMode = false;
   searchInput.value = "";
@@ -127,12 +124,14 @@ function renderBooks() {
   });
 }
 
+// 모달 열기
 function openDetail(idx) {
   currentDetailIndex = idx;
   showDetail();
   modal.style.display = "flex";
 }
 
+// 모달 내용
 function showDetail() {
   const book = filteredBooks[currentDetailIndex];
   if (!book) return;
@@ -162,20 +161,14 @@ function showDetail() {
   detailImage.src = book["상세페이지"] || "";
 }
 
-closeBtn.addEventListener("click", () => {
-  modal.style.display = "none";
-});
-
+// 모달 닫기
+closeBtn.addEventListener("click", () => { modal.style.display = "none"; });
 prevBtn.addEventListener("click", () => {
   currentDetailIndex = (currentDetailIndex - 1 + filteredBooks.length) % filteredBooks.length;
   showDetail();
 });
-
 nextBtn.addEventListener("click", () => {
   currentDetailIndex = (currentDetailIndex + 1) % filteredBooks.length;
   showDetail();
 });
-
-window.addEventListener("click", (e) => {
-  if (e.target === modal) modal.style.display = "none";
-});
+window.addEventListener("click", (e) => { if (e.target === modal) modal.style.display = "none"; });
