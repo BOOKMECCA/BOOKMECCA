@@ -7,17 +7,10 @@
   <style>
     * { box-sizing: border-box; }
     body { font-family: Arial, sans-serif; margin:0; padding:10px; }
-    h1 { margin:0; }
+    h1 { margin-bottom: 20px; display: flex; align-items: center; gap:10px; }
 
-    #header {
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin-bottom:10px;
-    }
-
-    #header img { height:40px; }
-    #homeBtn img { height:30px; cursor:pointer; }
+    #logo { height: 40px; cursor: pointer; }
+    #homeBtn { cursor: pointer; font-size: 24px; }
 
     #arFilter { margin-bottom: 10px; }
 
@@ -39,6 +32,10 @@
       font-weight: bold;
       border-color: #007bff;
     }
+
+    #searchContainer { display:flex; gap:5px; margin-bottom:10px; }
+    #searchInput { flex:1; padding:5px; }
+    #searchBtn { padding:5px 10px; cursor:pointer; }
 
     .book-list {
       display: flex;
@@ -99,28 +96,17 @@
       border-radius: 3px;
       user-select: none;
     }
-
-    #searchContainer {
-      display: flex;
-      gap: 5px;
-      margin-bottom: 10px;
-    }
-    #searchInput { flex:1; padding:5px; }
-    #searchBtn { padding:5px 10px; cursor:pointer; }
   </style>
 </head>
 <body>
-
-  <div id="header">
-    <img src="logo.png" alt="LOGO" />
-    <button id="homeBtn">
-      <img src="home-icon.png" alt="홈" />
-    </button>
-    <h1>추천 도서 목록</h1>
-  </div>
+  <h1>
+    <img src="logo.png" id="logo" alt="Logo" />
+    <span id="homeBtn">🏠</span>
+    추천 도서 목록
+  </h1>
 
   <div id="searchContainer">
-    <input type="text" id="searchInput" placeholder="검색어 입력..." />
+    <input type="text" id="searchInput" placeholder="검색어를 입력하세요" />
     <button id="searchBtn">검색</button>
   </div>
 
