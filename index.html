@@ -7,131 +7,118 @@
   <style>
     * { box-sizing: border-box; }
     body { font-family: Arial, sans-serif; margin:0; padding:10px; }
-    
-    /* 로고+홈+제목 영역 */
+
     #header {
       display: flex;
       align-items: center;
-      gap:10px;
-      margin-bottom: 15px;
+      gap: 10px;
+      margin-bottom: 10px;
     }
-    #logo { height: 40px; cursor: pointer; }
-    #homeBtn { cursor: pointer; font-size: 24px; }
-    #title { font-size: 1.5rem; font-weight: bold; }
 
-    #arFilter { margin-bottom: 10px; }
+    #logo {
+      height: 40px;
+      cursor: pointer;
+    }
+
+    #homeBtn {
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    #title {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    #searchContainer {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    #searchInput { flex: 1; padding: 6px; }
+    #searchBtn { padding: 6px 10px; cursor: pointer; }
 
     #tabs {
       display: flex;
       gap: 10px;
       margin-bottom: 15px;
     }
+
     .tab {
-      padding: 10px 15px;
+      padding: 10px;
       border: 1px solid #ccc;
-      cursor: pointer;
-      user-select: none;
       background: #f9f9f9;
+      cursor: pointer;
     }
+
     .tab.active {
       background: #007bff;
       color: white;
       font-weight: bold;
-      border-color: #007bff;
     }
-
-    #searchContainer { display:flex; gap:5px; margin-bottom:10px; }
-    #searchInput { flex:1; padding:5px; }
-    #searchBtn { padding:5px 10px; cursor:pointer; }
 
     .book-list {
       display: flex;
       flex-wrap: wrap;
       gap: 16px;
     }
+
     .book-card {
+      width: calc(50% - 8px);
       border: 1px solid #ccc;
       padding: 10px;
-      width: calc(50% - 8px);
+      background: #fff;
       cursor: pointer;
-      background: white;
     }
+
     .book-card img {
-      max-width: 100%;
-      height: auto;
-      display: block;
+      width: 100%;
       margin-bottom: 8px;
     }
-    .book-card h3 { margin:0 0 8px 0; font-size:1.1rem; }
-    .book-card p { margin:2px 0; font-size:0.9rem; color:#444; }
 
     .modal {
       display: none;
       position: fixed;
-      top:0; left:0; width:100%; height:100%;
+      inset: 0;
       background: rgba(0,0,0,0.5);
       justify-content: center;
       align-items: center;
       z-index: 999;
     }
+
     .modal-content {
-      background: white;
-      max-width: 480px;
+      background: #fff;
       width: 90%;
+      max-width: 480px;
       padding: 20px;
       position: relative;
-      border-radius: 4px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.3);
-      overflow-y: auto;
       max-height: 90%;
+      overflow-y: auto;
     }
+
     .close {
       position: absolute;
-      top: 10px; right: 10px;
+      top: 10px;
+      right: 10px;
       font-size: 24px;
       cursor: pointer;
-      user-select: none;
-    }
-    #detailImage { width: 100%; margin-top: 12px; }
-    #prevBtn, #nextBtn {
-      margin-top: 10px;
-      padding: 6px 12px;
-      cursor: pointer;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 3px;
-      user-select: none;
     }
   </style>
 </head>
 <body>
-  <!-- 헤더: 로고 + 홈 + 제목 -->
+
   <div id="header">
-    <img src="logo.png" id="logo" alt="Logo" />
+    <img src="logo.png" id="logo" alt="logo">
     <span id="homeBtn">🏠</span>
     <span id="title">추천 도서 목록</span>
   </div>
 
-  <!-- 검색창 -->
   <div id="searchContainer">
-    <input type="text" id="searchInput" placeholder="검색어를 입력하세요" />
+    <input id="searchInput" placeholder="검색어 입력" />
     <button id="searchBtn">검색</button>
   </div>
 
-  <!-- AR 필터 -->
-  <label for="arFilter">AR 레벨:</label>
-  <select id="arFilter">
-    <option value="all">전체</option>
-    <option value="1">1점대</option>
-    <option value="2">2점대</option>
-    <option value="3">3점대</option>
-    <option value="4">4점대</option>
-    <option value="5">5점대</option>
-    <option value="6">6점대 이상</option>
-  </select>
-
-  <!-- 카테고리 탭 -->
   <div id="tabs">
     <button class="tab active" data-category="리더스">리더스</button>
     <button class="tab" data-category="챕터북">챕터북</button>
@@ -140,21 +127,17 @@
     <button class="tab" data-category="대표상품">대표상품</button>
   </div>
 
-  <!-- 도서 리스트 -->
   <div id="bookList" class="book-list"></div>
 
-  <!-- 모달 -->
   <div id="detailModal" class="modal">
     <div class="modal-content">
       <span class="close">&times;</span>
       <h2 id="detailTitle"></h2>
-      <p>AR 레벨: <span id="detailAR"></span></p>
+      <p>AR: <span id="detailAR"></span></p>
       <p>출판사: <span id="detailPublisher"></span></p>
       <p>ISBN: <span id="detailISBN"></span></p>
       <p id="detailDesc"></p>
-      <img id="detailImage" src="" alt="상세 이미지" />
-      <button id="prevBtn">◀ 이전</button>
-      <button id="nextBtn">다음 ▶</button>
+      <img id="detailImage" />
     </div>
   </div>
 
