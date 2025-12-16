@@ -79,16 +79,16 @@ function renderBooks() {
   }
 
   // 검색 필터
-  const searchTerm = searchInput.value.toLowerCase();
+  const searchTerm = searchInput.value.trim().toLowerCase();
   if (searchTerm) {
     filteredBooks = filteredBooks.filter(book =>
-      book["도서명"].toLowerCase().includes(searchTerm)
+      book["도서명"] && book["도서명"].toLowerCase().includes(searchTerm)
     );
   }
 
   bookList.innerHTML = "";
 
-  filteredBooks.forEach((book, idx) => {
+  filteredBooks.forEach(book => {
     if (!book["도서명"]) return;
 
     let cardHTML = `<img src="${book["메인"]}" alt="${book["도서명"]}" />
@@ -99,13 +99,14 @@ function renderBooks() {
     const card = document.createElement("div");
     card.className = "book-card";
     card.innerHTML = cardHTML;
-    card.addEventListener("click", () => openDetail(idx));
+    card.addEventListener("click", () => openDetailByBook(book));
     bookList.appendChild(card);
   });
 }
 
-function openDetail(idx) {
-  currentDetailIndex = idx;
+// 검색 + 바코드 모두 올바른 책 모달 열기
+function openDetailByBook(book) {
+  currentDetailIndex = filteredBooks.indexOf(book);
   showDetail();
   modal.style.display = "flex";
 }
@@ -168,8 +169,9 @@ barcodeBtn.addEventListener("click", () => {
         { facingMode: "environment" },
         { fps: 10, qrbox: 250 },
         (decodedText) => {
-          const idx = books.findIndex(book => book["ISBN"] === decodedText);
-          if (idx !== -1) openDetail(idx);
+          // 바코드 스캔하면 해당 ISBN 책 모달 바로 열기
+          const book = books.find(b => b["ISBN"] === decodedText);
+          if (book) openDetailByBook(book);
 
           html5QrCode.stop().then(() => {
             barcodeScanner.style.display = "none";
