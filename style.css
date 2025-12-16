@@ -1,98 +1,36 @@
-* { box-sizing: border-box; }
-body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+/* ===========================
+   이미지 사이즈 문제 해결용
+   (기존 CSS 절대 건드리지 않음)
+   =========================== */
 
-h1 { padding: 10px; }
-
-#tabs { display: flex; overflow-x: auto; border-bottom: 1px solid #ccc; }
-.tab { flex: 1; padding: 10px; cursor: pointer; background: #f9f9f9; border: none; outline: none; }
-.tab.active { border-bottom: 3px solid #007bff; font-weight: bold; }
-
-.book-list {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  padding: 10px;
-}
-
-.book-card {
-  border: 1px solid #ccc;
-  padding: 5px;
-  background: #fff;
-  cursor: pointer;
-}
-
+/* 썸네일 이미지 과대 문제 해결 */
 .book-card img {
   width: 100%;
-  height: auto;
+  height: 160px;          /* 썸네일 높이 고정 */
+  object-fit: contain;   /* 비율 유지 */
+  background: #f5f5f5;
 }
 
-.modal {
-  display: none;
-  position: fixed;
-  top:0; left:0; width:100%; height:100%;
-  background: rgba(0,0,0,0.7);
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
+/* 모바일에서는 조금 더 작게 */
+@media (max-width: 768px) {
+  .book-card img {
+    height: 140px;
+  }
 }
 
-.modal-content {
-  background: #fff;
-  padding: 20px;
-  max-width: 500px;
-  width: 90%;
-  max-height: 90%;
-  overflow-y: auto;
-  position: relative;
+/* 상세페이지 이미지 과대 문제 해결 */
+#detailImage {
+  width: 100%;
+  max-height: 60vh;       /* 화면 기준으로 제한 */
+  object-fit: contain;   /* 확대 / 잘림 방지 */
+  display: block;
+  margin: 10px auto 0;
+  background: #f5f5f5;
 }
 
-.close { position: absolute; top:5px; right:10px; font-size: 24px; cursor: pointer; }
-
-.detail-image-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 10px;
+/* 모바일 상세 이미지 */
+@media (max-width: 768px) {
+  #detailImage {
+    max-height: 50vh;
+  }
 }
-
-.detail-image-wrapper img {
-  max-width: 80%;
-  margin: 0 10px;
-}
-
-.detail-image-wrapper button {
-  font-size: 24px;
-  cursor: pointer;
-  background: none;
-  border: none;
-}
-
-/* 닫기 버튼 상단 고정 */
-.modal-content .close {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  font-size: 28px;
-  z-index: 101;
-  cursor: pointer;
-}
-
-/* 반투명 좌우 화살표 */
-.nav-arrow {
-  position: fixed; /* 스크롤 위치와 상관없이 항상 보임 */
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 36px;
-  background: rgba(0,0,0,0.3);
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 50%;
-  cursor: pointer;
-  z-index: 100;
-}
-
-#prevBtn { left: 10px; }
-#nextBtn { right: 10px; }
-
-.nav-arrow.hidden { display: none; }
