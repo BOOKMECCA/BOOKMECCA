@@ -1,147 +1,119 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BOOKMECCA</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; margin:0; padding:10px; }
+let books = [];
+let filteredBooks = [];
+let currentCategory = "리더스";
+let currentDetailIndex = 0;
+let isSearchMode = false;
 
-    #header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
+const bookList = document.getElementById("bookList");
+const tabs = document.querySelectorAll(".tab");
+const tabsContainer = document.getElementById("tabs");
 
-    #logo {
-      height: 40px;
-      cursor: pointer;
-    }
+const searchInput = document.getElementById("searchInput");
+const searchBtn = document.getElementById("searchBtn");
+const logo = document.getElementById("logo");
+const homeBtn = document.getElementById("homeBtn");
 
-    #homeBtn {
-      font-size: 22px;
-      cursor: pointer;
-    }
+const modal = document.getElementById("detailModal");
+const closeBtn = modal.querySelector(".close");
 
-    #title {
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
+const detailTitle = document.getElementById("detailTitle");
+const detailAR = document.getElementById("detailAR");
+const detailPublisher = document.getElementById("detailPublisher");
+const detailISBN = document.getElementById("detailISBN");
+const detailDesc = document.getElementById("detailDesc");
+const detailImage = document.getElementById("detailImage");
 
-    #searchContainer {
-      display: flex;
-      gap: 5px;
-      margin-bottom: 10px;
-    }
+/* CSV */
+Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.csv", {
+  download: true,
+  header: true,
+  skipEmptyLines: true,
+  complete: r => {
+    books = r.data;
+    renderBooks();
+  }
+});
 
-    #searchInput { flex: 1; padding: 6px; }
-    #searchBtn { padding: 6px 10px; cursor: pointer; }
+/* 탭 */
+tabs.forEach(tab => {
+  tab.addEventListener("click", () => {
+    tabs.forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    currentCategory = tab.dataset.category;
+    isSearchMode = false;
+    tabsContainer.style.display = "flex";
+    renderBooks();
+  });
+});
 
-    #tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
+/* 검색 */
+searchBtn.addEventListener("click", doSearch);
+searchInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") doSearch();
+});
 
-    .tab {
-      padding: 10px;
-      border: 1px solid #ccc;
-      background: #f9f9f9;
-      cursor: pointer;
-    }
+function doSearch() {
+  if (!searchInput.value.trim()) return;
+  isSearchMode = true;
+  tabsContainer.style.display = "none";
+  renderBooks();
+}
 
-    .tab.active {
-      background: #007bff;
-      color: white;
-      font-weight: bold;
-    }
+/* 홈 복귀 (PC / 모바일 동일) */
+function goHome() {
+  isSearchMode = false;
+  searchInput.value = "";
+  tabsContainer.style.display = "flex";
 
-    .book-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
+  tabs.forEach(t => t.classList.remove("active"));
+  tabs[0].classList.add("active");
+  currentCategory = tabs[0].dataset.category;
 
-    .book-card {
-      width: calc(50% - 8px);
-      border: 1px solid #ccc;
-      padding: 10px;
-      background: #fff;
-      cursor: pointer;
-    }
+  renderBooks();
+}
 
-    .book-card img {
-      width: 100%;
-      margin-bottom: 8px;
-    }
+logo.addEventListener("click", goHome);
+homeBtn.addEventListener("click", goHome);
 
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-    }
+/* 렌더 */
+function renderBooks() {
+  if (isSearchMode) {
+    const term = searchInput.value.toLowerCase();
 
-    .modal-content {
-      background: #fff;
-      width: 90%;
-      max-width: 480px;
-      padding: 20px;
-      position: relative;
-      max-height: 90%;
-      overflow-y: auto;
-    }
+    filteredBooks = books.filter(book =>
+      ["도서명", "작가", "출판사", "ISBN", "설명"]
+        .some(k => book[k] && book[k].toLowerCase().includes(term))
+    );
+  } else {
+    filteredBooks = books.filter(b => b["카테고리"] === currentCategory);
+  }
 
-    .close {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 24px;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
+  bookList.innerHTML = "";
 
-  <div id="header">
-    <img src="logo.png" id="logo" alt="logo">
-    <span id="homeBtn">🏠</span>
-    <span id="title">추천 도서 목록</span>
-  </div>
+  filteredBooks.forEach((book, i) => {
+    const card = document.createElement("div");
+    card.className = "book-card";
+    card.innerHTML = `
+      <img src="${book["메인"]}">
+      <h3>${book["도서명"]}</h3>
+      <p>${book["설명"] || ""}</p>
+    `;
+    card.onclick = () => openDetail(i);
+    bookList.appendChild(card);
+  });
+}
 
-  <div id="searchContainer">
-    <input id="searchInput" placeholder="검색어 입력" />
-    <button id="searchBtn">검색</button>
-  </div>
+/* 모달 */
+function openDetail(i) {
+  const b = filteredBooks[i];
+  detailTitle.textContent = b["도서명"];
+  detailAR.textContent = b["AR레벨"] || "";
+  detailPublisher.textContent = b["출판사"] || "";
+  detailISBN.textContent = b["ISBN"] || "";
+  detailDesc.innerHTML = (b["설명"] || "").replace(/\n/g, "<br>");
+  detailImage.src = b["상세페이지"] || "";
+  modal.style.display = "flex";
+}
 
-  <div id="tabs">
-    <button class="tab active" data-category="리더스">리더스</button>
-    <button class="tab" data-category="챕터북">챕터북</button>
-    <button class="tab" data-category="스토리북">스토리북</button>
-    <button class="tab" data-category="논픽션">논픽션</button>
-    <button class="tab" data-category="대표상품">대표상품</button>
-  </div>
-
-  <div id="bookList" class="book-list"></div>
-
-  <div id="detailModal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2 id="detailTitle"></h2>
-      <p>AR: <span id="detailAR"></span></p>
-      <p>출판사: <span id="detailPublisher"></span></p>
-      <p>ISBN: <span id="detailISBN"></span></p>
-      <p id="detailDesc"></p>
-      <img id="detailImage" />
-    </div>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="script.js"></script>
-</body>
-</html>
+closeBtn.onclick = () => modal.style.display = "none";
+window.onclick = e => { if (e.target === modal) modal.style.display = "none"; };
