@@ -2,12 +2,12 @@ let books = [];
 let filteredBooks = [];
 let currentCategory = "리더스";
 let currentDetailIndex = 0;
-let isSearching = false; // 검색 모드 여부
+let isSearching = false;
 
 const bookList = document.getElementById("bookList");
 const arFilter = document.getElementById("arFilter");
-const tabsContainer = document.getElementById("tabs");
 const tabs = document.querySelectorAll("#tabs .tab");
+const tabsContainer = document.getElementById("tabs");
 const modal = document.getElementById("detailModal");
 const closeBtn = modal.querySelector(".close");
 
@@ -22,6 +22,7 @@ const nextBtn = document.getElementById("nextBtn");
 
 const searchInput = document.getElementById("searchInput");
 const searchBtn = document.getElementById("searchBtn");
+const homeBtn = document.getElementById("homeBtn");
 
 // CSV 불러오기
 Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.csv", {
@@ -37,12 +38,12 @@ Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.
 // 탭 클릭 이벤트
 tabs.forEach(tab => {
   tab.addEventListener("click", () => {
+    isSearching = false;
     tabs.forEach(t => t.classList.remove("active"));
     tab.classList.add("active");
     currentCategory = tab.dataset.category;
-    isSearching = false; // 탭 클릭 시 검색 모드 해제
-    tabsContainer.style.display = "flex"; // 탭 다시 보이기
     renderBooks();
+    tabsContainer.style.display = "flex";
   });
 });
 
@@ -51,74 +52,73 @@ arFilter.addEventListener("change", () => {
   renderBooks();
 });
 
-// 검색 버튼 클릭 이벤트
+// 검색 버튼 클릭
 searchBtn.addEventListener("click", () => {
-  performSearch();
-});
-
-// Enter 키로 검색
-searchInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    performSearch();
-  }
-});
-
-// 검색 수행 함수
-function performSearch() {
-  const term = searchInput.value.trim().toLowerCase();
-  if (term === "") {
-    isSearching = false;
-    tabsContainer.style.display = "flex"; // 검색어 없으면 탭 보이기
-  } else {
-    isSearching = true;
-    tabsContainer.style.display = "none"; // 검색 시 탭 숨기기
-  }
+  isSearching = true;
   renderBooks();
-}
+});
+
+// 엔터 입력 시 검색
+searchInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    isSearching = true;
+    renderBooks();
+  }
+});
+
+// 홈 버튼 클릭 시 초기화
+homeBtn.addEventListener("click", () => {
+  isSearching = false;
+  searchInput.value = "";
+  tabsContainer.style.display = "flex";
+  currentCategory = tabs[0].dataset.category;
+  tabs.forEach(t => t.classList.remove("active"));
+  tabs[0].classList.add("active");
+  renderBooks();
+});
 
 function renderBooks() {
   const arValue = arFilter.value;
+  let booksToRender;
+
   if (isSearching) {
-    // 검색 모드: 모든 카테고리에서 검색
-    filteredBooks = books.filter(book => {
-      const searchTerm = searchInput.value.trim().toLowerCase();
-      if (!searchTerm) return true;
-      // 도서명, 작가, ISBN, 설명 텍스트 모두 검색
-      const combinedText = [
-        book["도서명"] || "",
-        book["작가"] || "",
-        book["ISBN"] || "",
-        book["설명"] || ""
-      ].join(" ").toLowerCase();
-      return combinedText.includes(searchTerm);
-    });
+    // 검색 모드: 탭 무시, 모든 도서 대상
+    const searchTerm = searchInput.value.toLowerCase();
+    booksToRender = books.filter(book =>
+      (book["도서명"] && book["도서명"].toLowerCase().includes(searchTerm)) ||
+      (book["작가"] && book["작가"].toLowerCase().includes(searchTerm)) ||
+      (book["ISBN"] && book["ISBN"].toLowerCase().includes(searchTerm)) ||
+      (book["설명"] && book["설명"].toLowerCase().includes(searchTerm))
+    );
+    tabsContainer.style.display = "none"; // 검색 시 탭 숨김
   } else {
-    // 일반 모드: 현재 카테고리 + AR 필터 적용
-    filteredBooks = books.filter(book => book["카테고리"] === currentCategory);
-
-    if (arValue !== "all") {
-      filteredBooks = filteredBooks.filter(book => {
-        const arStr = book["AR레벨"];
-        if (!arStr) return false;
-
-        let minAR, maxAR;
-        if (arStr.includes("~")) {
-          const parts = arStr.split("~").map(p => parseFloat(p));
-          minAR = parts[0];
-          maxAR = parts[1];
-        } else {
-          minAR = maxAR = parseFloat(arStr);
-        }
-
-        const filterMin = parseInt(arValue, 10);
-        const filterMax = arValue === "6" ? Infinity : filterMin + 0.9;
-
-        return !(maxAR < filterMin || minAR > filterMax);
-      });
-    }
+    // 일반 모드: 현재 카테고리 필터
+    booksToRender = books.filter(book => book["카테고리"] === currentCategory);
+    tabsContainer.style.display = "flex"; // 탭 보임
   }
 
+  // AR 필터 적용
+  if (arValue !== "all") {
+    booksToRender = booksToRender.filter(book => {
+      const arStr = book["AR레벨"];
+      if (!arStr) return false;
+
+      let minAR, maxAR;
+      if (arStr.includes("~")) {
+        const parts = arStr.split("~").map(p => parseFloat(p));
+        minAR = parts[0];
+        maxAR = parts[1];
+      } else {
+        minAR = maxAR = parseFloat(arStr);
+      }
+
+      const filterMin = parseInt(arValue, 10);
+      const filterMax = arValue === "6" ? Infinity : filterMin + 0.9;
+      return !(maxAR < filterMin || minAR > filterMax);
+    });
+  }
+
+  filteredBooks = booksToRender;
   bookList.innerHTML = "";
 
   filteredBooks.forEach((book, idx) => {
