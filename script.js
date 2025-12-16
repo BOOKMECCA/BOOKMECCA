@@ -19,6 +19,7 @@ const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
 
 const searchInput = document.getElementById("searchInput");
+const searchBtn = document.getElementById("searchBtn");
 const barcodeBtn = document.getElementById("barcodeBtn");
 const barcodeScanner = document.getElementById("barcodeScanner");
 
@@ -48,8 +49,8 @@ arFilter.addEventListener("change", () => {
   renderBooks();
 });
 
-// 검색 기능
-searchInput.addEventListener("input", () => {
+// 검색 버튼 클릭 이벤트
+searchBtn.addEventListener("click", () => {
   renderBooks();
 });
 
@@ -88,7 +89,7 @@ function renderBooks() {
 
   bookList.innerHTML = "";
 
-  filteredBooks.forEach(book => {
+  filteredBooks.forEach((book, idx) => {
     if (!book["도서명"]) return;
 
     let cardHTML = `<img src="${book["메인"]}" alt="${book["도서명"]}" />
@@ -104,7 +105,7 @@ function renderBooks() {
   });
 }
 
-// 검색 + 바코드 모두 올바른 책 모달 열기
+// 카드 클릭 및 바코드 스캔 모달 열기
 function openDetailByBook(book) {
   currentDetailIndex = filteredBooks.indexOf(book);
   showDetail();
@@ -158,10 +159,9 @@ window.addEventListener("click", (e) => {
   if (e.target === modal) modal.style.display = "none";
 });
 
-// 바코드 스캔 기능 (html5-qrcode 사용)
+// 바코드 스캔 기능
 barcodeBtn.addEventListener("click", () => {
   barcodeScanner.style.display = "block";
-
   const html5QrCode = new Html5Qrcode("barcodeScanner");
   Html5Qrcode.getCameras().then(cameras => {
     if (cameras && cameras.length) {
@@ -169,15 +169,11 @@ barcodeBtn.addEventListener("click", () => {
         { facingMode: "environment" },
         { fps: 10, qrbox: 250 },
         (decodedText) => {
-          // 바코드 스캔하면 해당 ISBN 책 모달 바로 열기
           const book = books.find(b => b["ISBN"] === decodedText);
           if (book) openDetailByBook(book);
-
-          html5QrCode.stop().then(() => {
-            barcodeScanner.style.display = "none";
-          });
+          html5QrCode.stop().then(() => { barcodeScanner.style.display = "none"; });
         },
-        (errorMessage) => { /* 스캔 중 오류 무시 */ }
+        (errorMessage) => {}
       );
     }
   }).catch(err => console.error(err));
