@@ -7,10 +7,17 @@
   <style>
     * { box-sizing: border-box; }
     body { font-family: Arial, sans-serif; margin:0; padding:10px; }
-    h1 { margin-bottom: 20px; display: flex; align-items: center; gap:10px; }
-
+    
+    /* 로고+홈+제목 영역 */
+    #header {
+      display: flex;
+      align-items: center;
+      gap:10px;
+      margin-bottom: 15px;
+    }
     #logo { height: 40px; cursor: pointer; }
     #homeBtn { cursor: pointer; font-size: 24px; }
+    #title { font-size: 1.5rem; font-weight: bold; }
 
     #arFilter { margin-bottom: 10px; }
 
@@ -99,17 +106,20 @@
   </style>
 </head>
 <body>
-  <h1>
+  <!-- 헤더: 로고 + 홈 + 제목 -->
+  <div id="header">
     <img src="logo.png" id="logo" alt="Logo" />
     <span id="homeBtn">🏠</span>
-    추천 도서 목록
-  </h1>
+    <span id="title">추천 도서 목록</span>
+  </div>
 
+  <!-- 검색창 -->
   <div id="searchContainer">
     <input type="text" id="searchInput" placeholder="검색어를 입력하세요" />
     <button id="searchBtn">검색</button>
   </div>
 
+  <!-- AR 필터 -->
   <label for="arFilter">AR 레벨:</label>
   <select id="arFilter">
     <option value="all">전체</option>
@@ -121,6 +131,7 @@
     <option value="6">6점대 이상</option>
   </select>
 
+  <!-- 카테고리 탭 -->
   <div id="tabs">
     <button class="tab active" data-category="리더스">리더스</button>
     <button class="tab" data-category="챕터북">챕터북</button>
@@ -129,8 +140,10 @@
     <button class="tab" data-category="대표상품">대표상품</button>
   </div>
 
+  <!-- 도서 리스트 -->
   <div id="bookList" class="book-list"></div>
 
+  <!-- 모달 -->
   <div id="detailModal" class="modal">
     <div class="modal-content">
       <span class="close">&times;</span>
