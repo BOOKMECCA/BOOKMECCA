@@ -52,20 +52,30 @@ arFilter.addEventListener("change", () => {
   renderBooks();
 });
 
-// 검색 버튼 클릭 및 엔터 이벤트
+// 검색 버튼 클릭 및 Enter 키 이벤트
 function applySearch() { renderBooks(true); }
 
 searchBtn.addEventListener("click", applySearch);
-searchInput.addEventListener("keydown", e => { if(e.key === "Enter") applySearch(); });
+searchInput.addEventListener("keydown", e => { 
+  if (e.key === "Enter") {
+    e.preventDefault();
+    applySearch();
+  }
+});
 
 // renderBooks 함수
 function renderBooks(searchMode=false) {
   const arValue = arFilter.value;
+  const searchTerm = searchInput.value.trim().toLowerCase();
 
-  if(searchMode && searchInput.value.trim() !== "") {
-    // 검색어 기준 전체 도서 필터
-    const term = searchInput.value.toLowerCase();
-    filteredBooks = books.filter(book => book["도서명"] && book["도서명"].toLowerCase().includes(term));
+  if (searchMode && searchTerm !== "") {
+    // 전체 도서에서 텍스트 검색 (도서명, AR레벨, 출판사, ISBN, 설명)
+    filteredBooks = books.filter(book => {
+      return Object.keys(book).some(key => {
+        const val = book[key];
+        return val && val.toString().toLowerCase().includes(searchTerm);
+      });
+    });
   } else {
     // 탭+AR 필터 기준
     filteredBooks = books.filter(book => book["카테고리"] === currentCategory);
@@ -94,6 +104,8 @@ function renderBooks(searchMode=false) {
     let cardHTML = `<img src="${book["메인"]}" alt="${book["도서명"]}" />
                     <h3>${book["도서명"]}</h3>`;
     if(book["AR레벨"]) cardHTML += `<p>AR 레벨: ${book["AR레벨"]}</p>`;
+    if(book["출판사"]) cardHTML += `<p>출판사: ${book["출판사"]}</p>`;
+    if(book["ISBN"]) cardHTML += `<p>ISBN: ${book["ISBN"]}</p>`;
     if(book["설명"]) cardHTML += `<p>${book["설명"].replace(/\n/g,"<br>")}</p>`;
 
     const card = document.createElement("div");
