@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BOOKMECCA</title>
+
   <style>
     * { box-sizing: border-box; }
     body { font-family: Arial, sans-serif; margin:0; padding:10px; }
@@ -25,15 +26,12 @@
       cursor: pointer;
     }
 
-    #title {
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
+    h1 { margin: 0; }
 
     #searchContainer {
       display: flex;
       gap: 5px;
-      margin-bottom: 10px;
+      margin: 10px 0;
     }
 
     #searchInput { flex: 1; padding: 6px; }
@@ -48,8 +46,8 @@
     .tab {
       padding: 10px;
       border: 1px solid #ccc;
-      background: #f9f9f9;
       cursor: pointer;
+      background: #f9f9f9;
     }
 
     .tab.active {
@@ -68,8 +66,8 @@
       width: calc(50% - 8px);
       border: 1px solid #ccc;
       padding: 10px;
-      background: #fff;
       cursor: pointer;
+      background: white;
     }
 
     .book-card img {
@@ -88,9 +86,9 @@
     }
 
     .modal-content {
-      background: #fff;
-      width: 90%;
+      background: white;
       max-width: 480px;
+      width: 90%;
       padding: 20px;
       position: relative;
       max-height: 90%;
@@ -99,49 +97,4 @@
 
     .close {
       position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 24px;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-
-  <div id="header">
-    <img src="logo.png" id="logo" alt="logo">
-    <span id="homeBtn">🏠</span>
-    <span id="title">추천 도서 목록</span>
-  </div>
-
-  <div id="searchContainer">
-    <input id="searchInput" placeholder="검색어 입력" />
-    <button id="searchBtn">검색</button>
-  </div>
-
-  <div id="tabs">
-    <button class="tab active" data-category="리더스">리더스</button>
-    <button class="tab" data-category="챕터북">챕터북</button>
-    <button class="tab" data-category="스토리북">스토리북</button>
-    <button class="tab" data-category="논픽션">논픽션</button>
-    <button class="tab" data-category="대표상품">대표상품</button>
-  </div>
-
-  <div id="bookList" class="book-list"></div>
-
-  <div id="detailModal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2 id="detailTitle"></h2>
-      <p>AR: <span id="detailAR"></span></p>
-      <p>출판사: <span id="detailPublisher"></span></p>
-      <p>ISBN: <span id="detailISBN"></span></p>
-      <p id="detailDesc"></p>
-      <img id="detailImage" />
-    </div>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="script.js"></script>
-</body>
-</html>
+      top: 10p
