@@ -2,7 +2,6 @@ let books = [];
 let filteredBooks = [];
 let currentCategory = "리더스";
 let currentDetailIndex = 0;
-let searchMode = false;
 
 const bookList = document.getElementById("bookList");
 const arFilter = document.getElementById("arFilter");
@@ -21,8 +20,12 @@ const nextBtn = document.getElementById("nextBtn");
 
 const searchInput = document.getElementById("searchInput");
 const searchBtn = document.getElementById("searchBtn");
+const barcodeBtn = document.getElementById("barcodeBtn");
+const barcodeScanner = document.getElementById("barcodeScanner");
 
-// CSV 불러오기
+let isSearching = false;
+
+// CSV 불러오기 (원본 유지)
 Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.csv", {
   download: true,
   header: true,
@@ -36,81 +39,79 @@ Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.
 // 탭 클릭 이벤트
 tabs.forEach(tab => {
   tab.addEventListener("click", () => {
-    searchMode = false;
     tabs.forEach(t => t.classList.remove("active"));
     tab.classList.add("active");
     currentCategory = tab.dataset.category;
-    document.getElementById("tabs").style.display = "flex";
+    isSearching = false;
+    tabsContainer.style.display = "flex";
     renderBooks();
   });
 });
 
-// AR 필터 변경 이벤트
-arFilter.addEventListener("change", () => {
-  renderBooks();
-});
+// AR 필터 변경
+arFilter.addEventListener("change", () => { renderBooks(); });
 
-// 검색 버튼 클릭
-searchBtn.addEventListener("click", () => {
-  searchMode = true;
-  document.getElementById("tabs").style.display = "none"; // 검색 시 탭 숨김
-  renderBooks();
-});
+// 검색 버튼
+searchBtn.addEventListener("click", () => { performSearch(); });
 
-// Enter 키 검색
+// Enter 키 이벤트
 searchInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    searchMode = true;
-    document.getElementById("tabs").style.display = "none";
-    renderBooks();
+  if(e.key === "Enter") {
+    e.preventDefault();
+    performSearch();
   }
 });
 
+// 검색 수행 함수
+function performSearch() {
+  const term = searchInput.value.trim().toLowerCase();
+  if(term === "") {
+    isSearching = false;
+    tabsContainer.style.display = "flex";
+  } else {
+    isSearching = true;
+    tabsContainer.style.display = "none";
+  }
+  renderBooks();
+}
+
+// 렌더링
 function renderBooks() {
   const arValue = arFilter.value;
-
-  if (!searchMode) {
-    // 탭 모드
+  if(!isSearching) {
     filteredBooks = books.filter(book => book["카테고리"] === currentCategory);
   } else {
-    // 검색 모드
-    filteredBooks = books.slice(); // 모든 책
-    const term = searchInput.value.toLowerCase();
-    filteredBooks = filteredBooks.filter(book => {
-      return (
-        (book["도서명"] && book["도서명"].toLowerCase().includes(term)) ||
-        (book["작가"] && book["작가"].toLowerCase().includes(term)) ||
-        (book["ISBN"] && book["ISBN"].toLowerCase().includes(term)) ||
-        (book["설명"] && book["설명"].toLowerCase().includes(term)) ||
-        (book["출판사"] && book["출판사"].toLowerCase().includes(term))
+    const term = searchInput.value.trim().toLowerCase();
+    filteredBooks = books.filter(book => {
+      return Object.values(book).some(value =>
+        value && value.toLowerCase().includes(term)
       );
     });
   }
 
-  if (arValue !== "all") {
+  if(arValue !== "all") {
     filteredBooks = filteredBooks.filter(book => {
       const arStr = book["AR레벨"];
       if (!arStr) return false;
       let minAR, maxAR;
       if (arStr.includes("~")) {
         const parts = arStr.split("~").map(p => parseFloat(p));
-        minAR = parts[0]; maxAR = parts[1];
-      } else { minAR = maxAR = parseFloat(arStr); }
-      const filterMin = parseInt(arValue, 10);
-      const filterMax = arValue === "6" ? Infinity : filterMin + 0.9;
+        minAR = parts[0];
+        maxAR = parts[1];
+      } else minAR = maxAR = parseFloat(arStr);
+      const filterMin = parseInt(arValue,10);
+      const filterMax = arValue==="6"? Infinity:filterMin+0.9;
       return !(maxAR < filterMin || minAR > filterMax);
     });
   }
 
   bookList.innerHTML = "";
-
   filteredBooks.forEach((book, idx) => {
     if (!book["도서명"]) return;
     let cardHTML = `<img src="${book["메인"]}" alt="${book["도서명"]}" />
                     <h3>${book["도서명"]}</h3>`;
     if (book["AR레벨"]) cardHTML += `<p>AR 레벨: ${book["AR레벨"]}</p>`;
-    if (book["설명"]) cardHTML += `<p>${book["설명"].replace(/\n/g, "<br>")}</p>`;
-
+    if (book["설명"]) cardHTML += `<p>${book["설명"].replace(/\n/g,"<br>")}</p>`;
     const card = document.createElement("div");
     card.className = "book-card";
     card.innerHTML = cardHTML;
@@ -119,6 +120,7 @@ function renderBooks() {
   });
 }
 
+// 모달
 function openDetail(idx) {
   currentDetailIndex = idx;
   showDetail();
@@ -127,31 +129,50 @@ function openDetail(idx) {
 
 function showDetail() {
   const book = filteredBooks[currentDetailIndex];
-  if (!book) return;
+  if(!book) return;
 
   detailTitle.textContent = book["도서명"];
-  if (book["AR레벨"]) { detailAR.textContent = book["AR레벨"]; detailAR.parentElement.style.display="block"; }
+  if(book["AR레벨"]) { detailAR.textContent=book["AR레벨"]; detailAR.parentElement.style.display="block"; } 
   else detailAR.parentElement.style.display="none";
-
-  if (book["출판사"]) { detailPublisher.textContent = book["출판사"]; detailPublisher.parentElement.style.display="block"; }
+  if(book["출판사"]) { detailPublisher.textContent=book["출판사"]; detailPublisher.parentElement.style.display="block"; }
   else detailPublisher.parentElement.style.display="none";
-
-  if (book["ISBN"]) { detailISBN.textContent = book["ISBN"]; detailISBN.parentElement.style.display="block"; }
+  if(book["ISBN"]) { detailISBN.textContent=book["ISBN"]; detailISBN.parentElement.style.display="block"; }
   else detailISBN.parentElement.style.display="none";
-
-  if (book["설명"]) { detailDesc.innerHTML = book["설명"].replace(/\n/g, "<br>"); detailDesc.style.display="block"; }
+  if(book["설명"]) { detailDesc.innerHTML = book["설명"].replace(/\n/g,"<br>"); detailDesc.style.display="block"; }
   else detailDesc.style.display="none";
-
-  detailImage.src = book["상세페이지"] || "";
+  detailImage.src = book["상세페이지"]||"";
 }
 
-closeBtn.addEventListener("click", () => { modal.style.display = "none"; });
-prevBtn.addEventListener("click", () => {
-  currentDetailIndex = (currentDetailIndex - 1 + filteredBooks.length) % filteredBooks.length;
-  showDetail();
+closeBtn.addEventListener("click",()=>{modal.style.display="none";});
+prevBtn.addEventListener("click",()=>{currentDetailIndex=(currentDetailIndex-1+filteredBooks.length)%filteredBooks.length; showDetail();});
+nextBtn.addEventListener("click",()=>{currentDetailIndex=(currentDetailIndex+1)%filteredBooks.length; showDetail();});
+window.addEventListener("click",(e)=>{if(e.target===modal) modal.style.display="none";});
+
+// 바코드 스캔 (Html5 QR Code)
+barcodeBtn.addEventListener("click", ()=>{
+  barcodeScanner.style.display="block";
+  const html5QrCode = new Html5Qrcode("barcodeScanner");
+  Html5Qrcode.getCameras().then(cameras=>{
+    if(cameras && cameras.length){
+      html5QrCode.start(
+        { facingMode:"environment" },
+        { fps:10, qrbox:250 },
+        (decodedText)=>{
+          const idx = books.findIndex(book=>book["ISBN"]===decodedText);
+          if(idx!==-1){ 
+            isSearching = true;
+            tabsContainer.style.display = "none";
+            searchInput.value = decodedText;
+            renderBooks();
+            openDetail(filteredBooks.findIndex(b=>b["ISBN"]===decodedText));
+          }
+          html5QrCode.stop().then(()=>{barcodeScanner.style.display="none";});
+        },
+        err=>{}
+      );
+    }
+  }).catch(err=>console.error(err));
 });
-nextBtn.addEventListener("click", () => {
-  currentDetailIndex = (currentDetailIndex + 1) % filteredBooks.length;
-  showDetail();
-});
-window.addEventListener("click", (e) => { if(e.target === modal) modal.style.display="none"; });
+
+// 탭 컨테이너
+const tabsContainer = document.getElementById("tabs");
