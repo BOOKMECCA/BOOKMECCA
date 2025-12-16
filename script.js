@@ -2,12 +2,11 @@ let books = [];
 let filteredBooks = [];
 let currentCategory = "리더스";
 let currentDetailIndex = 0;
-let isSearching = false;
+let isSearchMode = false;
 
 const bookList = document.getElementById("bookList");
 const arFilter = document.getElementById("arFilter");
 const tabs = document.querySelectorAll("#tabs .tab");
-const tabsContainer = document.getElementById("tabs");
 const modal = document.getElementById("detailModal");
 const closeBtn = modal.querySelector(".close");
 
@@ -22,6 +21,7 @@ const nextBtn = document.getElementById("nextBtn");
 
 const searchInput = document.getElementById("searchInput");
 const searchBtn = document.getElementById("searchBtn");
+const logo = document.getElementById("logo");
 const homeBtn = document.getElementById("homeBtn");
 
 // CSV 불러오기
@@ -38,12 +38,12 @@ Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.
 // 탭 클릭 이벤트
 tabs.forEach(tab => {
   tab.addEventListener("click", () => {
-    isSearching = false;
+    currentCategory = tab.dataset.category;
     tabs.forEach(t => t.classList.remove("active"));
     tab.classList.add("active");
-    currentCategory = tab.dataset.category;
+    isSearchMode = false;
+    document.getElementById("tabs").style.display = "flex";
     renderBooks();
-    tabsContainer.style.display = "flex";
   });
 });
 
@@ -52,73 +52,63 @@ arFilter.addEventListener("change", () => {
   renderBooks();
 });
 
-// 검색 버튼 클릭
+// 검색 버튼 클릭 이벤트
 searchBtn.addEventListener("click", () => {
-  isSearching = true;
+  isSearchMode = true;
+  document.getElementById("tabs").style.display = "none";
   renderBooks();
 });
 
-// 엔터 입력 시 검색
-searchInput.addEventListener("keypress", (e) => {
+// 엔터 키 입력 시 검색
+searchInput.addEventListener("keyup", (e) => {
   if (e.key === "Enter") {
-    isSearching = true;
-    renderBooks();
+    searchBtn.click();
   }
 });
 
-// 홈 버튼 클릭 시 초기화
-homeBtn.addEventListener("click", () => {
-  isSearching = false;
+// 로고 클릭 / 홈 버튼 클릭 → 원래 상태
+function goHome() {
+  isSearchMode = false;
   searchInput.value = "";
-  tabsContainer.style.display = "flex";
-  currentCategory = tabs[0].dataset.category;
-  tabs.forEach(t => t.classList.remove("active"));
-  tabs[0].classList.add("active");
+  document.getElementById("tabs").style.display = "flex";
   renderBooks();
-});
+}
+logo.addEventListener("click", goHome);
+homeBtn.addEventListener("click", goHome);
 
 function renderBooks() {
-  const arValue = arFilter.value;
-  let booksToRender;
+  filteredBooks = [];
 
-  if (isSearching) {
-    // 검색 모드: 탭 무시, 모든 도서 대상
+  if (isSearchMode) {
     const searchTerm = searchInput.value.toLowerCase();
-    booksToRender = books.filter(book =>
-      (book["도서명"] && book["도서명"].toLowerCase().includes(searchTerm)) ||
-      (book["작가"] && book["작가"].toLowerCase().includes(searchTerm)) ||
-      (book["ISBN"] && book["ISBN"].toLowerCase().includes(searchTerm)) ||
-      (book["설명"] && book["설명"].toLowerCase().includes(searchTerm))
-    );
-    tabsContainer.style.display = "none"; // 검색 시 탭 숨김
-  } else {
-    // 일반 모드: 현재 카테고리 필터
-    booksToRender = books.filter(book => book["카테고리"] === currentCategory);
-    tabsContainer.style.display = "flex"; // 탭 보임
-  }
-
-  // AR 필터 적용
-  if (arValue !== "all") {
-    booksToRender = booksToRender.filter(book => {
-      const arStr = book["AR레벨"];
-      if (!arStr) return false;
-
-      let minAR, maxAR;
-      if (arStr.includes("~")) {
-        const parts = arStr.split("~").map(p => parseFloat(p));
-        minAR = parts[0];
-        maxAR = parts[1];
-      } else {
-        minAR = maxAR = parseFloat(arStr);
-      }
-
-      const filterMin = parseInt(arValue, 10);
-      const filterMax = arValue === "6" ? Infinity : filterMin + 0.9;
-      return !(maxAR < filterMin || minAR > filterMax);
+    filteredBooks = books.filter(book => {
+      return ["도서명","작가","ISBN","설명"].some(key => book[key] && book[key].toLowerCase().includes(searchTerm));
     });
+  } else {
+    filteredBooks = books.filter(book => book["카테고리"] === currentCategory);
+
+    const arValue = arFilter.value;
+    if (arValue !== "all") {
+      filteredBooks = filteredBooks.filter(book => {
+        const arStr = book["AR레벨"];
+        if (!arStr) return false;
+
+        let minAR, maxAR;
+        if (arStr.includes("~")) {
+          const parts = arStr.split("~").map(p => parseFloat(p));
+          minAR = parts[0];
+          maxAR = parts[1];
+        } else {
+          minAR = maxAR = parseFloat(arStr);
+        }
+
+        const filterMin = parseInt(arValue, 10);
+        const filterMax = arValue === "6" ? Infinity : filterMin + 0.9;
+        return !(maxAR < filterMin || minAR > filterMax);
+      });
+    }
   }
 
-  filteredBooks = booksToRender;
   bookList.innerHTML = "";
 
   filteredBooks.forEach((book, idx) => {
