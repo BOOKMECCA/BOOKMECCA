@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BOOKMECCA</title>
+
   <style>
     * { box-sizing: border-box; }
     body { font-family: Arial, sans-serif; margin:0; padding:10px; }
@@ -20,7 +21,6 @@
       padding: 10px 15px;
       border: 1px solid #ccc;
       cursor: pointer;
-      user-select: none;
       background: #f9f9f9;
     }
     .tab.active {
@@ -30,6 +30,7 @@
       border-color: #007bff;
     }
 
+    /* ===== 썸네일 리스트 ===== */
     .book-list {
       display: flex;
       flex-wrap: wrap;
@@ -39,81 +40,96 @@
       border: 1px solid #ccc;
       padding: 10px;
       width: calc(50% - 8px);
-      cursor: pointer;
       background: white;
+      cursor: pointer;
     }
+
+    /* 🔥 썸네일 이미지 크기 정상화 */
     .book-card img {
-      max-width: 100%;   /* 🔹 원본 썸네일 크기 유지 */
-      height: auto;
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
       display: block;
       margin-bottom: 8px;
     }
-    .book-card h3 { margin:0 0 8px 0; font-size:1.1rem; }
-    .book-card p { margin:2px 0; font-size:0.9rem; color:#444; }
 
+    .book-card h3 {
+      margin: 0 0 6px 0;
+      font-size: 1.05rem;
+    }
+    .book-card p {
+      margin: 2px 0;
+      font-size: 0.9rem;
+      color: #444;
+    }
+
+    /* ===== 모달 ===== */
     .modal {
       display: none;
       position: fixed;
-      top:0; left:0; width:100%; height:100%;
+      inset: 0;
       background: rgba(0,0,0,0.5);
       justify-content: center;
       align-items: center;
       z-index: 999;
     }
+
     .modal-content {
       background: white;
       max-width: 480px;
       width: 90%;
-      position: relative;
-      border-radius: 4px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.3);
       max-height: 90%;
       overflow-y: auto;
+      border-radius: 4px;
+      position: relative;
     }
 
-    /* 🔹 모달 헤더 (닫기 버튼 프레임) */
+    /* 🔥 닫기 버튼 프레임 */
     .modal-header {
       position: sticky;
       top: 0;
       background: white;
       padding: 10px;
       border-bottom: 1px solid #ddd;
-      z-index: 10;
       text-align: right;
+      z-index: 10;
     }
 
     .close {
       font-size: 24px;
       cursor: pointer;
-      user-select: none;
     }
 
     .modal-body {
       padding: 20px;
     }
 
-    #detailImage { width: 100%; margin-top: 12px; }
+    #detailImage {
+      width: 100%;
+      margin-top: 12px;
+    }
 
-    /* 🔹 모달 내부 고정 화살표 */
+    /* 🔥 모달 내부 화살표 */
     .arrow-btn {
       position: sticky;
       top: 50%;
       transform: translateY(-50%);
       font-size: 36px;
-      color: rgba(255,255,255,0.6);
-      background: rgba(0,0,0,0.2);
+      background: rgba(0,0,0,0.25);
+      color: rgba(255,255,255,0.7);
       border: none;
-      cursor: pointer;
       padding: 10px;
-      user-select: none;
+      cursor: pointer;
       z-index: 10;
     }
+
     #arrowPrev { float: left; margin-left: -10px; }
     #arrowNext { float: right; margin-right: -10px; }
 
     .hidden { display: none; }
   </style>
 </head>
+
 <body>
   <h1>추천 도서 목록</h1>
 
@@ -138,6 +154,7 @@
 
   <div id="bookList" class="book-list"></div>
 
+  <!-- ===== 상세 모달 ===== -->
   <div id="detailModal" class="modal">
     <div class="modal-content">
 
@@ -155,13 +172,135 @@
         <p id="detailISBN"></p>
         <p>AR 레벨: <span id="detailAR"></span></p>
         <p id="detailDesc"></p>
-        <img id="detailImage" src="" alt="상세 이미지" />
+        <img id="detailImage" />
       </div>
 
     </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="script.js"></script>
+
+  <script>
+    let books = [];
+    let filteredBooks = [];
+    let currentCategory = "리더스";
+    let currentDetailIndex = 0;
+
+    const bookList = document.getElementById("bookList");
+    const arFilter = document.getElementById("arFilter");
+    const tabs = document.querySelectorAll("#tabs .tab");
+    const modal = document.getElementById("detailModal");
+    const closeBtn = document.querySelector(".close");
+
+    const detailTitle = document.getElementById("detailTitle");
+    const detailAuthor = document.getElementById("detailAuthor");
+    const detailPublisher = document.getElementById("detailPublisher");
+    const detailISBN = document.getElementById("detailISBN");
+    const detailAR = document.getElementById("detailAR");
+    const detailDesc = document.getElementById("detailDesc");
+    const detailImage = document.getElementById("detailImage");
+
+    const arrowPrev = document.getElementById("arrowPrev");
+    const arrowNext = document.getElementById("arrowNext");
+
+    Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.csv", {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        books = results.data;
+        renderBooks();
+      }
+    });
+
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        tabs.forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        currentCategory = tab.dataset.category;
+        renderBooks();
+      });
+    });
+
+    arFilter.addEventListener("change", renderBooks);
+
+    function renderBooks() {
+      const arValue = arFilter.value;
+      filteredBooks = books.filter(b => b["카테고리"] === currentCategory);
+
+      if (arValue !== "all") {
+        filteredBooks = filteredBooks.filter(book => {
+          const arStr = book["AR레벨"];
+          if (!arStr) return false;
+
+          let minAR, maxAR;
+          if (arStr.includes("~")) {
+            [minAR, maxAR] = arStr.split("~").map(Number);
+          } else {
+            minAR = maxAR = Number(arStr);
+          }
+
+          const filterMin = Number(arValue);
+          const filterMax = arValue === "6" ? Infinity : filterMin + 0.9;
+          return !(maxAR < filterMin || minAR > filterMax);
+        });
+      }
+
+      bookList.innerHTML = "";
+
+      filteredBooks.forEach((book, idx) => {
+        if (!book["도서명"]) return;
+
+        let html = `
+          <img src="${book["메인"]}">
+          <h3>${book["도서명"]}</h3>
+        `;
+
+        if (book["AR레벨"]) html += `<p>AR 레벨: ${book["AR레벨"]}</p>`;
+        if (book["설명"]) html += `<p>${book["설명"].replace(/\n/g,"<br>")}</p>`;
+
+        const card = document.createElement("div");
+        card.className = "book-card";
+        card.innerHTML = html;
+        card.addEventListener("click", () => openDetail(idx));
+        bookList.appendChild(card);
+      });
+    }
+
+    function openDetail(idx) {
+      currentDetailIndex = idx;
+      showDetail();
+      modal.style.display = "flex";
+    }
+
+    function showDetail() {
+      const book = filteredBooks[currentDetailIndex];
+      if (!book) return;
+
+      detailTitle.textContent = book["도서명"] || "";
+      detailAuthor.textContent = book["작가"] ? `작가: ${book["작가"]}` : "";
+      detailPublisher.textContent = book["출판사"] ? `출판사: ${book["출판사"]}` : "";
+      detailISBN.textContent = book["ISBN"] ? `ISBN: ${book["ISBN"]}` : "";
+      detailAR.textContent = book["AR레벨"] || "";
+      detailDesc.innerHTML = book["설명"] ? book["설명"].replace(/\n/g,"<br>") : "";
+      detailImage.src = book["상세페이지"] || "";
+
+      arrowPrev.classList.toggle("hidden", currentDetailIndex === 0);
+      arrowNext.classList.toggle("hidden", currentDetailIndex === filteredBooks.length - 1);
+    }
+
+    closeBtn.addEventListener("click", () => modal.style.display = "none");
+
+    arrowPrev.addEventListener("click", () => {
+      if (currentDetailIndex > 0) { currentDetailIndex--; showDetail(); }
+    });
+    arrowNext.addEventListener("click", () => {
+      if (currentDetailIndex < filteredBooks.length - 1) { currentDetailIndex++; showDetail(); }
+    });
+
+    window.addEventListener("click", e => {
+      if (e.target === modal) modal.style.display = "none";
+    });
+  </script>
 </body>
 </html>
