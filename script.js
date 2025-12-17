@@ -6,11 +6,13 @@ let currentDetailIndex = 0;
 const bookList = document.getElementById("bookList");
 const arFilter = document.getElementById("arFilter");
 const tabs = document.querySelectorAll("#tabs .tab");
-
 const modal = document.getElementById("detailModal");
-const closeBtn = document.querySelector(".close");
+const closeBtn = modal.querySelector(".close");
 
 const detailTitle = document.getElementById("detailTitle");
+const detailAuthor = document.getElementById("detailAuthor");
+const detailPublisher = document.getElementById("detailPublisher");
+const detailISBN = document.getElementById("detailISBN");
 const detailAR = document.getElementById("detailAR");
 const detailDesc = document.getElementById("detailDesc");
 const detailImage = document.getElementById("detailImage");
@@ -18,7 +20,6 @@ const detailImage = document.getElementById("detailImage");
 const arrowPrev = document.getElementById("arrowPrev");
 const arrowNext = document.getElementById("arrowNext");
 
-// CSV 불러오기
 Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.csv", {
   download: true,
   header: true,
@@ -29,7 +30,6 @@ Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.
   }
 });
 
-// 탭 클릭
 tabs.forEach(tab => {
   tab.addEventListener("click", () => {
     tabs.forEach(t => t.classList.remove("active"));
@@ -39,7 +39,6 @@ tabs.forEach(tab => {
   });
 });
 
-// AR 필터
 arFilter.addEventListener("change", renderBooks);
 
 function renderBooks() {
@@ -69,14 +68,15 @@ function renderBooks() {
   filteredBooks.forEach((book, idx) => {
     if (!book["도서명"]) return;
 
+    let html = `<img src="${book["메인"]}" alt="${book["도서명"]}">
+                <h3>${book["도서명"]}</h3>`;
+
+    if (book["AR레벨"]) html += `<p>AR 레벨: ${book["AR레벨"]}</p>`;
+    if (book["설명"]) html += `<p>${book["설명"].replace(/\n/g,"<br>")}</p>`;
+
     const card = document.createElement("div");
     card.className = "book-card";
-    card.innerHTML = `
-      <img src="${book["메인"]}" />
-      <h3>${book["도서명"]}</h3>
-      <p>AR 레벨: ${book["AR레벨"] || ""}</p>
-      <p>${(book["설명"] || "").replace(/\n/g, "<br>")}</p>
-    `;
+    card.innerHTML = html;
     card.addEventListener("click", () => openDetail(idx));
     bookList.appendChild(card);
   });
@@ -92,9 +92,12 @@ function showDetail() {
   const book = filteredBooks[currentDetailIndex];
   if (!book) return;
 
-  detailTitle.textContent = book["도서명"];
+  detailTitle.textContent = book["도서명"] || "";
+  detailAuthor.textContent = book["작가"] ? `작가: ${book["작가"]}` : "";
+  detailPublisher.textContent = book["출판사"] ? `출판사: ${book["출판사"]}` : "";
+  detailISBN.textContent = book["ISBN"] ? `ISBN: ${book["ISBN"]}` : "";
   detailAR.textContent = book["AR레벨"] || "";
-  detailDesc.innerHTML = (book["설명"] || "").replace(/\n/g, "<br>");
+  detailDesc.innerHTML = book["설명"] ? book["설명"].replace(/\n/g,"<br>") : "";
   detailImage.src = book["상세페이지"] || "";
 
   arrowPrev.classList.toggle("hidden", currentDetailIndex === 0);
@@ -104,17 +107,10 @@ function showDetail() {
 closeBtn.addEventListener("click", () => modal.style.display = "none");
 
 arrowPrev.addEventListener("click", () => {
-  if (currentDetailIndex > 0) {
-    currentDetailIndex--;
-    showDetail();
-  }
+  if (currentDetailIndex > 0) { currentDetailIndex--; showDetail(); }
 });
-
 arrowNext.addEventListener("click", () => {
-  if (currentDetailIndex < filteredBooks.length - 1) {
-    currentDetailIndex++;
-    showDetail();
-  }
+  if (currentDetailIndex < filteredBooks.length - 1) { currentDetailIndex++; showDetail(); }
 });
 
 window.addEventListener("click", e => {
