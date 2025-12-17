@@ -6,8 +6,9 @@ let currentDetailIndex = 0;
 const bookList = document.getElementById("bookList");
 const arFilter = document.getElementById("arFilter");
 const tabs = document.querySelectorAll("#tabs .tab");
+
 const modal = document.getElementById("detailModal");
-const closeBtn = modal.querySelector(".close");
+const closeBtn = document.querySelector(".close");
 
 const detailTitle = document.getElementById("detailTitle");
 const detailAR = document.getElementById("detailAR");
@@ -28,7 +29,7 @@ Papa.parse("https://raw.githubusercontent.com/bookmecca/BOOKMECCA/main/booklist.
   }
 });
 
-// 탭 클릭 이벤트
+// 탭 클릭
 tabs.forEach(tab => {
   tab.addEventListener("click", () => {
     tabs.forEach(t => t.classList.remove("active"));
@@ -38,10 +39,8 @@ tabs.forEach(tab => {
   });
 });
 
-// AR 필터 변경 이벤트
-arFilter.addEventListener("change", () => {
-  renderBooks();
-});
+// AR 필터
+arFilter.addEventListener("change", renderBooks);
 
 function renderBooks() {
   const arValue = arFilter.value;
@@ -54,16 +53,13 @@ function renderBooks() {
 
       let minAR, maxAR;
       if (arStr.includes("~")) {
-        const parts = arStr.split("~").map(p => parseFloat(p));
-        minAR = parts[0];
-        maxAR = parts[1];
+        [minAR, maxAR] = arStr.split("~").map(Number);
       } else {
-        minAR = maxAR = parseFloat(arStr);
+        minAR = maxAR = Number(arStr);
       }
 
-      const filterMin = parseInt(arValue, 10);
+      const filterMin = Number(arValue);
       const filterMax = arValue === "6" ? Infinity : filterMin + 0.9;
-
       return !(maxAR < filterMin || minAR > filterMax);
     });
   }
@@ -73,15 +69,14 @@ function renderBooks() {
   filteredBooks.forEach((book, idx) => {
     if (!book["도서명"]) return;
 
-    // 리뷰, 작가명 제거
-    let cardHTML = `<img src="${book["메인"]}" alt="${book["도서명"]}" />
-                    <h3>${book["도서명"]}</h3>`;
-    if (book["AR레벨"]) cardHTML += `<p>AR 레벨: ${book["AR레벨"]}</p>`;
-    if (book["설명"]) cardHTML += `<p>${book["설명"].replace(/\n/g, "<br>")}</p>`;
-
     const card = document.createElement("div");
     card.className = "book-card";
-    card.innerHTML = cardHTML;
+    card.innerHTML = `
+      <img src="${book["메인"]}" />
+      <h3>${book["도서명"]}</h3>
+      <p>AR 레벨: ${book["AR레벨"] || ""}</p>
+      <p>${(book["설명"] || "").replace(/\n/g, "<br>")}</p>
+    `;
     card.addEventListener("click", () => openDetail(idx));
     bookList.appendChild(card);
   });
@@ -91,7 +86,6 @@ function openDetail(idx) {
   currentDetailIndex = idx;
   showDetail();
   modal.style.display = "flex";
-  updateArrows();
 }
 
 function showDetail() {
@@ -100,28 +94,29 @@ function showDetail() {
 
   detailTitle.textContent = book["도서명"];
   detailAR.textContent = book["AR레벨"] || "";
-  detailDesc.innerHTML = book["설명"] ? book["설명"].replace(/\n/g, "<br>") : "";
+  detailDesc.innerHTML = (book["설명"] || "").replace(/\n/g, "<br>");
   detailImage.src = book["상세페이지"] || "";
 
-  updateArrows();
-}
-
-function updateArrows() {
   arrowPrev.classList.toggle("hidden", currentDetailIndex === 0);
   arrowNext.classList.toggle("hidden", currentDetailIndex === filteredBooks.length - 1);
 }
 
-closeBtn.addEventListener("click", () => { modal.style.display = "none"; });
+closeBtn.addEventListener("click", () => modal.style.display = "none");
 
 arrowPrev.addEventListener("click", () => {
-  if (currentDetailIndex > 0) { currentDetailIndex--; showDetail(); }
+  if (currentDetailIndex > 0) {
+    currentDetailIndex--;
+    showDetail();
+  }
 });
+
 arrowNext.addEventListener("click", () => {
-  if (currentDetailIndex < filteredBooks.length - 1) { currentDetailIndex++; showDetail(); }
+  if (currentDetailIndex < filteredBooks.length - 1) {
+    currentDetailIndex++;
+    showDetail();
+  }
 });
 
-// 모바일 스와이프 제거
-
-window.addEventListener("click", (e) => { 
-  if (e.target === modal) modal.style.display = "none"; 
+window.addEventListener("click", e => {
+  if (e.target === modal) modal.style.display = "none";
 });
