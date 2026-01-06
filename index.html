@@ -557,17 +557,26 @@ card.dataset.search = book['검색어'] || '';  // 검색용
     }
     
     /* =========================
-       탭 클릭 이벤트
-    ========================= */
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-    
-            currentCategory = tab.textContent.trim();
-            applyFilters();
-        });
+   탭 클릭 이벤트 (검색 초기화 포함)
+========================= */
+tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+        // 모든 탭 비활성화
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        // 현재 카테고리 변경
+        currentCategory = tab.textContent.trim();
+
+        // 검색 초기화
+        searchInput.value = '';
+        document.getElementById('noResultsMsg').style.display = 'none';
+
+        // 필터 적용 (탭 기준)
+        applyFilters();
     });
+});
+
     
     /* =========================
        AR 필터
@@ -714,22 +723,3 @@ noResultsMsg.style.display = visibleCards.length === 0 ? 'block' : 'none';
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
