@@ -611,12 +611,10 @@ searchInput.addEventListener('keyup', (e) => {
     if (e.key === 'Enter') {
         const query = searchInput.value.trim().toLowerCase();
         const cards = document.querySelectorAll('.book-card');
+        const noResultsMsg = document.getElementById('noResultsMsg');
 
         if (query === '') {
-            // 검색어 없으면 검색 종료, 원래 필터 적용
-            isSearching = false;
-
-            // 탭 활성화 표시 복원
+            // 검색어 없으면 기존 필터 적용
             tabs.forEach(tab => tab.classList.remove('active'));
             tabs.forEach(tab => {
                 if (tab.textContent.trim() === currentCategory) {
@@ -624,15 +622,15 @@ searchInput.addEventListener('keyup', (e) => {
                 }
             });
 
-            applyFilters(); // 기존 필터 적용
+            applyFilters(); 
+            noResultsMsg.style.display = 'none'; // 메시지 숨기기
             return;
         }
 
         // 검색 시작
-        isSearching = true;
-
-        // 모든 탭 비활성화
         tabs.forEach(tab => tab.classList.remove('active'));
+
+        let hasResult = false; // 검색 결과 존재 여부
 
         cards.forEach(card => {
             const title = card.querySelector('.book-title').textContent.toLowerCase();
@@ -648,15 +646,17 @@ searchInput.addEventListener('keyup', (e) => {
                 isbn.includes(query) ||
                 searchField.includes(query)
             ) {
-                card.style.display = ''; 
+                card.style.display = '';
+                hasResult = true;
             } else {
                 card.style.display = 'none';
             }
         });
-         // 결과 없으면 메시지 보이기
+
+        // 결과 없으면 메시지 보이기
         noResultsMsg.style.display = hasResult ? 'none' : 'block';
 
-        fixColumnHeights(); // 높이 맞춤
+        fixColumnHeights();
     }
 });
 
@@ -694,6 +694,7 @@ searchInput.addEventListener('keyup', (e) => {
     </script>
 </body>
 </html>
+
 
 
 
