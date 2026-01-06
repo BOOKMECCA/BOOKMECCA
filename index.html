@@ -180,13 +180,25 @@
             color: #FFFFFF;
         }
 
-        main {
+       main {
     flex: 1 0 auto;
     display: flex;
-    justify-content: center;
-    align-items: flex-start; /* top 정렬 */
+    justify-content: center;  /* 가로 중앙 */
+    align-items: center;      /* 세로 중앙 */
     text-align: center;
-    min-height: 500px; /* 카드 그리드 최소 높이 지정 */
+    min-height: 500px;
+    position: relative;       /* 메시지 절대 위치용 */
+    flex-direction: column;   /* 카드와 메시지 수직 정렬 */
+}
+        #noResultsMsg {
+    display: none;            /* 기본 숨김 */
+    position: absolute;       /* 화면 중앙 배치 */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* 정확한 중앙 */
+    font-size: 16px;
+    color: #555555;
+    margin: 0;                /* 기존 margin 제거 */
 }
 
         @media (min-width: 768px) {
@@ -696,6 +708,7 @@ noResultsMsg.style.display = visibleCards.length === 0 ? 'block' : 'none';
     </script>
 </body>
 </html>
+
 
 
 
