@@ -235,18 +235,19 @@
 
         .card-body {
             padding: 10px;
+            text-align: left;
         }
 
         .book-title {
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 13px;
+            font-weight: 500;
             margin: 0 0 4px 0;
         }
 
         .ar-level {
             font-size: 12px;
             color: #36A5FF;
-            font-weight: 500;
+            font-weight: 700;
         }
 
         .book-desc {
@@ -254,6 +255,7 @@
             color: #555555;
             margin-top: 6px;
             line-height: 1.4;
+            white-space: pre-line;
         }
 
         .detail-modal {
@@ -463,7 +465,12 @@
                 const card = document.createElement('div');
                 card.className = 'book-card';
                 card.dataset.category = book['카테고리'];
-                card.dataset.ar = book['AR'] ? parseFloat(book['AR']) : '';
+card.dataset.ar = book['AR'] ? parseFloat(book['AR']) : '';
+card.dataset.author = book['작가'] || '';
+card.dataset.publisher = book['출판사'] || '';
+card.dataset.isbn = book['ISBN'] || '';
+card.dataset.search = book['검색어'] || '';  // 검색용
+
     
                 card.innerHTML = `
                     <div class="thumb">
@@ -585,6 +592,64 @@
     document.querySelector('.detail-content .close-btn').addEventListener('click', () => {
     modal.classList.remove('active');
 });
+
+/* =========================
+   검색 기능 (엔터키 적용)
+========================= */
+const searchInput = document.querySelector('.search-input');
+let isSearching = false; // 검색 중인지 여부
+
+searchInput.addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') {
+        const query = searchInput.value.trim().toLowerCase();
+        const cards = document.querySelectorAll('.book-card');
+
+        if (query === '') {
+            // 검색어 없으면 검색 종료, 원래 필터 적용
+            isSearching = false;
+
+            // 탭 활성화 표시 복원
+            tabs.forEach(tab => tab.classList.remove('active'));
+            tabs.forEach(tab => {
+                if (tab.textContent.trim() === currentCategory) {
+                    tab.classList.add('active');
+                }
+            });
+
+            applyFilters(); // 기존 필터 적용
+            return;
+        }
+
+        // 검색 시작
+        isSearching = true;
+
+        // 모든 탭 비활성화
+        tabs.forEach(tab => tab.classList.remove('active'));
+
+        cards.forEach(card => {
+            const title = card.querySelector('.book-title').textContent.toLowerCase();
+            const author = card.dataset.author ? card.dataset.author.toLowerCase() : '';
+            const publisher = card.dataset.publisher ? card.dataset.publisher.toLowerCase() : '';
+            const isbn = card.dataset.isbn ? card.dataset.isbn.toLowerCase() : '';
+            const searchField = card.dataset.search ? card.dataset.search.toLowerCase() : '';
+
+            if (
+                title.includes(query) ||
+                author.includes(query) ||
+                publisher.includes(query) ||
+                isbn.includes(query) ||
+                searchField.includes(query)
+            ) {
+                card.style.display = ''; 
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        fixColumnHeights(); // 높이 맞춤
+    }
+});
+
     
     /* =========================
        열 단위 카드 높이 맞춤
