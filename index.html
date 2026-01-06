@@ -484,17 +484,19 @@
        카드 렌더링
     ========================= */
     function renderCards() {
+        // 최초 렌더링만
         if (cardGrid.childElementCount === 0) {
             allBooks.forEach(book => {
                 const card = document.createElement('div');
                 card.className = 'book-card';
                 card.dataset.category = book['카테고리'];
-                card.dataset.ar = book['AR'] ? parseFloat(book['AR']) : '';
-                card.dataset.author = book['작가'] || '';
-                card.dataset.publisher = book['출판사'] || '';
-                card.dataset.isbn = book['ISBN'] || '';
-                card.dataset.search = book['검색어'] || '';
+card.dataset.ar = book['AR'] ? parseFloat(book['AR']) : '';
+card.dataset.author = book['작가'] || '';
+card.dataset.publisher = book['출판사'] || '';
+card.dataset.isbn = book['ISBN'] || '';
+card.dataset.search = book['검색어'] || '';  // 검색용
 
+    
                 card.innerHTML = `
                     <div class="thumb">
                         <img 
@@ -515,8 +517,10 @@
                 `;
                 cardGrid.appendChild(card);
             });
-            bindDetailEvents();
+            bindDetailEvents(); // 이벤트는 처음에만 바인딩
         }
+    
+        // 필터 적용 + 카드 높이 맞춤
         applyFilters();
     }
     
@@ -525,15 +529,16 @@
     ========================= */
     function applyFilters() {
         const cards = document.querySelectorAll('.book-card');
+    
         cards.forEach(card => {
             const categories = card.dataset.category ? card.dataset.category.split(',').map(c => c.trim()) : [];
             const categoryMatch = currentCategory === '전체' || categories.includes(currentCategory);
-
+    
             let arMatch = true;
             if (currentARFilter && currentARFilter !== '전체') {
                 const cardAR = parseFloat(card.dataset.ar);
                 let filterMin, filterMax;
-
+    
                 if (currentARFilter === '6점이상') {
                     filterMin = 6;
                     filterMax = Infinity;
@@ -541,35 +546,29 @@
                     filterMin = parseInt(currentARFilter, 10);
                     filterMax = filterMin + 0.9;
                 }
-
+    
                 arMatch = !isNaN(cardAR) && cardAR >= filterMin && cardAR <= filterMax;
             }
-
+    
             card.style.display = categoryMatch && arMatch ? '' : 'none';
         });
-
-        fixColumnHeights();
+    
+        fixColumnHeights(); // ✅ 필터 후 높이 맞춤
     }
     
     /* =========================
-       탭 클릭 이벤트 (검색어 유지)
+       탭 클릭 이벤트
     ========================= */
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             tabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-
+    
             currentCategory = tab.textContent.trim();
-
-            const query = searchInput.value.trim().toLowerCase();
-            if(query === '') {
-                applyFilters();
-            } else {
-                applySearch(query);
-            }
+            applyFilters();
         });
     });
-
+    
     /* =========================
        AR 필터
     ========================= */
@@ -603,7 +602,7 @@
                 detailISBN.textContent = img.dataset.isbn;
                 detailAuthor.textContent = img.dataset.author;
                 detailPublisher.textContent = img.dataset.publisher;
-
+    
                 modal.classList.add('active');
             });
         });
@@ -616,17 +615,39 @@
     });
 
     document.querySelector('.detail-content .close-btn').addEventListener('click', () => {
-        modal.classList.remove('active');
-    });
+    modal.classList.remove('active');
+});
 
-    /* =========================
-       검색 적용 함수
-    ========================= */
-    function applySearch(query) {
+/* =========================
+   검색 기능 (엔터키 적용)
+========================= */
+const searchInput = document.querySelector('.search-input');
+let isSearching = false; // 검색 중인지 여부
+
+searchInput.addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') {
+        const query = searchInput.value.trim().toLowerCase();
         const cards = document.querySelectorAll('.book-card');
         const noResultsMsg = document.getElementById('noResultsMsg');
 
-        let hasResult = false;
+        if (query === '') {
+            // 검색어 없으면 기존 필터 적용
+            tabs.forEach(tab => tab.classList.remove('active'));
+            tabs.forEach(tab => {
+                if (tab.textContent.trim() === currentCategory) {
+                    tab.classList.add('active');
+                }
+            });
+
+            applyFilters(); 
+            noResultsMsg.style.display = 'none'; // 메시지 숨기기
+            return;
+        }
+
+        // 검색 시작
+        tabs.forEach(tab => tab.classList.remove('active'));
+
+        let hasResult = false; // 검색 결과 존재 여부
 
         cards.forEach(card => {
             const title = card.querySelector('.book-title').textContent.toLowerCase();
@@ -635,18 +656,13 @@
             const isbn = card.dataset.isbn ? card.dataset.isbn.toLowerCase() : '';
             const searchField = card.dataset.search ? card.dataset.search.toLowerCase() : '';
 
-            const categories = card.dataset.category ? card.dataset.category.split(',').map(c => c.trim()) : [];
-            const categoryMatch = currentCategory === '전체' || categories.includes(currentCategory);
-
-            const matchesSearch = (
+            if (
                 title.includes(query) ||
                 author.includes(query) ||
                 publisher.includes(query) ||
                 isbn.includes(query) ||
                 searchField.includes(query)
-            );
-
-            if(categoryMatch && matchesSearch) {
+            ) {
                 card.style.display = '';
                 hasResult = true;
             } else {
@@ -654,25 +670,15 @@
             }
         });
 
-        noResultsMsg.style.display = hasResult ? 'none' : 'block';
+        // 결과 없으면 메시지 보이기
+const visibleCards = Array.from(cards).filter(card => card.style.display !== 'none');
+noResultsMsg.style.display = visibleCards.length === 0 ? 'block' : 'none';
+
+
         fixColumnHeights();
     }
+});
 
-    /* =========================
-       검색 input 이벤트
-    ========================= */
-    const searchInput = document.querySelector('.search-input');
-    searchInput.addEventListener('keyup', (e) => {
-        if (e.key === 'Enter') {
-            const query = searchInput.value.trim().toLowerCase();
-            if (query === '') {
-                applyFilters(); 
-                document.getElementById('noResultsMsg').style.display = 'none';
-            } else {
-                applySearch(query);
-            }
-        }
-    });
     
     /* =========================
        열 단위 카드 높이 맞춤
@@ -680,29 +686,35 @@
     function fixColumnHeights() {
         const grid = document.querySelector('.card-grid');
         const cards = Array.from(grid.children).filter(c => c.style.display !== 'none');
-
+    
         if (!cards.length) return;
-
+    
+        // grid-template-columns 기반으로 열 개수 계산
         const style = getComputedStyle(grid);
         const gap = parseInt(style.columnGap) || 0;
         const gridWidth = grid.clientWidth;
         const colWidth = cards[0].offsetWidth;
         const cols = Math.floor((gridWidth + gap) / (colWidth + gap)) || 1;
-
+    
+        // 카드 높이 초기화
         cards.forEach(c => c.style.height = 'auto');
-
+    
+        // 열 단위로 높이 맞춤
         for (let i = 0; i < cards.length; i += cols) {
             const rowCards = cards.slice(i, i + cols);
             const maxHeight = Math.max(...rowCards.map(c => c.offsetHeight));
             rowCards.forEach(c => c.style.height = maxHeight + 'px');
         }
     }
-
+    
+    // 화면 리사이즈 시 높이 재계산
     window.addEventListener('resize', fixColumnHeights);
-</script>
+    
+    </script>
 
 </body>
 </html>
+
 
 
 
