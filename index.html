@@ -311,7 +311,11 @@
     border: none;
     font-size: 20px;
     cursor: pointer;
-    color: #000000;
+    color: #000000 !important;    /* 모바일에서도 강제 */
+    -webkit-appearance: none;     /* Safari, iOS용 */
+    appearance: none;             /* 표준 */
+    padding: 0;                   /* 기본 여백 제거 */
+    line-height: 1;               /* 높이 맞춤 */
 }
 
 /* 스크롤 가능 영역 */
@@ -685,6 +689,7 @@ searchInput.addEventListener('keyup', (e) => {
     </script>
 </body>
 </html>
+
 
 
 
