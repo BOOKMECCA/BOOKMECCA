@@ -65,7 +65,7 @@
             border: 1px solid #B6D23C;
             border-radius: 14.5px;
             background-color: #FFFFFF;
-            font-size: 16px;
+            font-size: 14px;
             box-sizing: border-box;
         }
 
@@ -180,21 +180,22 @@
             color: #FFFFFF;
         }
 
-       main {
+        main {
     flex: 1 0 auto;
     display: flex;
-    justify-content: center;  /* 가로 중앙 */
-    align-items: center;      /* 세로 중앙 */
+    justify-content: flex-start;  /* 세로 방향은 위쪽으로 */
+    align-items: stretch;          /* 카드 그리드 가로 폭 꽉 차게 */
     text-align: center;
     min-height: 500px;
-    position: relative;       /* 메시지 절대 위치용 */
-    flex-direction: column;   /* 카드와 메시지 수직 정렬 */
+    position: relative;
+    flex-direction: column;
 }
+
        #noResultsMsg {
     display: none;
     position: fixed;     /* 화면 전체 기준 */
     position: absolute;
-    top: 60%;
+    top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 16px;
@@ -220,9 +221,9 @@
         .card-grid {
     width: 100%;
     display: grid;
+    margin-top: 14px;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 6px;
-    padding: 20px 0;
     box-sizing: border-box;
     min-height: 500px; /* 여기서도 최소 높이 지정 */
     align-items: start;
