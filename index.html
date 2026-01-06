@@ -653,6 +653,8 @@ searchInput.addEventListener('keyup', (e) => {
                 card.style.display = 'none';
             }
         });
+         // 결과 없으면 메시지 보이기
+        noResultsMsg.style.display = hasResult ? 'none' : 'block';
 
         fixColumnHeights(); // 높이 맞춤
     }
@@ -692,6 +694,7 @@ searchInput.addEventListener('keyup', (e) => {
     </script>
 </body>
 </html>
+
 
 
 
