@@ -654,7 +654,9 @@ searchInput.addEventListener('keyup', (e) => {
         });
 
         // 결과 없으면 메시지 보이기
-        noResultsMsg.style.display = hasResult ? 'none' : 'block';
+const visibleCards = Array.from(cards).filter(card => card.style.display !== 'none');
+noResultsMsg.style.display = visibleCards.length === 0 ? 'block' : 'none';
+
 
         fixColumnHeights();
     }
@@ -694,6 +696,7 @@ searchInput.addEventListener('keyup', (e) => {
     </script>
 </body>
 </html>
+
 
 
 
