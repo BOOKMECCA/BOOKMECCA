@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOOKMECCA</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
     <style>
         html, body {
@@ -18,11 +19,13 @@
 
         .container {
             max-width: 100%;
+            width: 100%; 
             padding: 0 18px;
             box-sizing: border-box;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            align-items: stretch;
         }
 
         header {
@@ -39,14 +42,12 @@
             object-fit: contain;
         }
 
-        /* 검색창 래퍼 (추가) */
         .search-wrap {
             position: relative;
             width: 176px;
             margin-top: 18px;
         }
 
-        /* 돋보기 아이콘 (추가) */
         .search-icon {
             position: absolute;
             left: 10px;
@@ -60,7 +61,7 @@
         .search-input {
             width: 176px;
             height: 29px;
-            padding: 4px 8px 4px 32px; /* 아이콘 공간 */
+            padding: 4px 8px 4px 32px;
             border: 1px solid #B6D23C;
             border-radius: 14.5px;
             background-color: #FFFFFF;
@@ -69,10 +70,9 @@
         }
 
         .search-input:focus {
-        outline: none;
-        border-color: #B6D23C;
+            outline: none;
+            border-color: #B6D23C;
         }
-
 
         .recommend-section {
             margin-top: 20px;
@@ -161,18 +161,18 @@
         }
 
         .tab {
-        height: 32px;
-        padding: 0 15px;          /* 좌우 여백으로 크기 조절 */
-        border-radius: 16px;
-        background-color: #E8E8E8;
-        color: #000000;
-        font-size: 14px;
-        font-weight: 400;
-        display: inline-flex;     /* 내용 크기에 맞게 */
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        flex-shrink: 0;
+            height: 32px;
+            padding: 0 15px;
+            border-radius: 16px;
+            background-color: #E8E8E8;
+            color: #000000;
+            font-size: 14px;
+            font-weight: 400;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
         }
 
         .tab.active {
@@ -181,12 +181,13 @@
         }
 
         main {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
+    flex: 1 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* top 정렬 */
+    text-align: center;
+    min-height: 500px; /* 카드 그리드 최소 높이 지정 */
+}
 
         @media (min-width: 768px) {
             .container {
@@ -200,9 +201,153 @@
                 max-width: 960px;
             }
         }
+
+        .card-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 6px;
+    padding: 20px 0;
+    box-sizing: border-box;
+    min-height: 500px; /* 여기서도 최소 높이 지정 */
+    align-items: start;
+    }
+
+        .book-card {
+            background-color: #FFFFFF;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .thumb {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background-color: #EDEDED;
+        }
+
+        .thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-body {
+            padding: 10px;
+        }
+
+        .book-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+        }
+
+        .ar-level {
+            font-size: 12px;
+            color: #36A5FF;
+            font-weight: 500;
+        }
+
+        .book-desc {
+            font-size: 12px;
+            color: #555555;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        .detail-modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            z-index: 1000;
+        }
+
+        .detail-modal.active {
+            display: block;
+        }
+
+        .detail-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+        }
+
+        /* 모달 내용 */
+        .detail-content {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 320px;
+    background: #FFFFFF;
+    border-radius: 10px;
+    overflow: hidden;    /* 내부 스크롤 영역이 모서리 밖으로 안 나가게 */
+    max-height: 90vh;  /* 화면 안에서 전체 모달 높이 제한 */
+    display: flex;
+    flex-direction: column;  /* 헤더+내용 세로 정렬 */
+    box-sizing: border-box;
+}
+
+/* 모달 상단 고정 헤더 */
+.detail-content .modal-header {
+    flex: 0 0 auto;
+    position: sticky;
+    top: 0;
+    background: #FFFFFF;
+    z-index: 10;
+    display: flex;
+    justify-content: flex-end;
+    padding: 5px 12px;
+    border-bottom: 1px solid #eee;
+}
+
+/* 닫기 버튼 */
+.detail-content .close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* 스크롤 가능 영역 */
+.detail-content .modal-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 12px;
+    box-sizing: border-box;
+    /* border-radius 제거 */
+}
+
+/* 이미지 */
+.detail-content .modal-body img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+/* 텍스트 */
+.detail-content .detail-info p {
+    margin: 6px 0;
+    font-size: 13px;
+}
+
+
+        .detail-info {
+            margin-top: 12px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .detail-info p {
+            margin: 6px 0;
+        }
+
     </style>
 </head>
-
 <body>
 <div class="container">
 
@@ -212,9 +357,8 @@
             <img src="http://mecca01.hgodo.com/goods/bookmecca_logo.png" alt="로고" class="logo">
         </a>
 
-        <!--  검색창 + 아이콘  -->
         <div class="search-wrap">
-            <img src="search.svg" class="search-icon" alt="검색"> <!-- 나중에 이미지 주소 넣으면 됨 -->
+            <img src="search.svg" class="search-icon" alt="검색">
             <input type="text" class="search-input">
         </div>        
     </header>
@@ -253,65 +397,225 @@
     </div>
 
     <main>
-        <p>콘텐츠</p>
+        <div class="card-grid" id="cardGrid"></div>
     </main>
+    
+</div>
+
+<div class="detail-modal" id="detailModal">
+    <div class="detail-overlay"></div>
+
+    <div class="detail-content">
+        <!-- 고정 헤더 -->
+        <div class="modal-header">
+            <button class="close-btn">&times;</button>
+        </div>
+
+        <!-- 스크롤 가능한 내용 영역 -->
+        <div class="modal-body">
+            <img id="detailImage" src="" alt="상세 이미지">
+            <div class="detail-info">
+                <p><strong>ISBN</strong> <span id="detailISBN"></span></p>
+                <p><strong>작가</strong> <span id="detailAuthor"></span></p>
+                <p><strong>출판사</strong> <span id="detailPublisher"></span></p>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
+    let allBooks = [];
+    let currentCategory = '대표도서';  // 기본 탭
+    let currentARFilter = '전체';
+    
+    const cardGrid = document.getElementById('cardGrid');
+    const tabs = document.querySelectorAll('.tab');
     const dropdown = document.getElementById('dropdown');
     const selectedFilter = document.getElementById('selectedFilter');
     const arrowImg = document.getElementById('arrowImg');
-
-    let currentSelected = null;
-
-    function toggleDropdown() {
-        const options = dropdown.querySelectorAll('div');
-        options.forEach(item => {
-            item.classList.remove('selected', 'dimmed');
-
-            if (currentSelected === null) {
-                item.classList.add('dimmed');
-            } else {
-                if (item.textContent === currentSelected) {
-                    item.classList.add('selected');
-                } else {
-                    item.classList.add('dimmed');
-                }
-            }
-        });
-
-        if (dropdown.style.display === 'block') {
-            dropdown.style.display = 'none';
-            arrowImg.src = 'arrow_down.svg'; // 닫혔을 때 아래 화살표
-        } else {
-            dropdown.style.display = 'block';
-            arrowImg.src = 'arrow_up.svg';   // 열렸을 때 위 화살표
+    
+    const modal = document.getElementById('detailModal');
+    const detailImage = document.getElementById('detailImage');
+    const detailISBN = document.getElementById('detailISBN');
+    const detailAuthor = document.getElementById('detailAuthor');
+    const detailPublisher = document.getElementById('detailPublisher');
+    
+    /* =========================
+       CSV 불러오기
+    ========================= */
+    Papa.parse('data.csv', {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+            allBooks = results.data;
+            renderCards();
         }
+    });
+    
+    /* =========================
+       카드 렌더링
+    ========================= */
+    function renderCards() {
+        // 최초 렌더링만
+        if (cardGrid.childElementCount === 0) {
+            allBooks.forEach(book => {
+                const card = document.createElement('div');
+                card.className = 'book-card';
+                card.dataset.category = book['카테고리'];
+                card.dataset.ar = book['AR'] ? parseFloat(book['AR']) : '';
+    
+                card.innerHTML = `
+                    <div class="thumb">
+                        <img 
+                            src="${book['메인']}" 
+                            alt="${book['도서명']}"
+                            class="detail-trigger"
+                            data-detail-img="${book['상세페이지'] || ''}"
+                            data-isbn="${book['ISBN'] || ''}"
+                            data-author="${book['작가'] || ''}"
+                            data-publisher="${book['출판사'] || ''}"
+                        >
+                    </div>
+                    <div class="card-body">
+                        <h3 class="book-title">${book['도서명']}</h3>
+                        ${book['AR'] ? `<span class="ar-level">AR ${book['AR']}</span>` : ''}
+                        <p class="book-desc">${book['설명'] || ''}</p>
+                    </div>
+                `;
+                cardGrid.appendChild(card);
+            });
+            bindDetailEvents(); // 이벤트는 처음에만 바인딩
+        }
+    
+        // 필터 적용 + 카드 높이 맞춤
+        applyFilters();
     }
-
+    
+    /* =========================
+       필터 적용 (카테고리 + AR)
+    ========================= */
+    function applyFilters() {
+        const cards = document.querySelectorAll('.book-card');
+    
+        cards.forEach(card => {
+            const categories = card.dataset.category ? card.dataset.category.split(',').map(c => c.trim()) : [];
+            const categoryMatch = currentCategory === '전체' || categories.includes(currentCategory);
+    
+            let arMatch = true;
+            if (currentARFilter && currentARFilter !== '전체') {
+                const cardAR = parseFloat(card.dataset.ar);
+                let filterMin, filterMax;
+    
+                if (currentARFilter === '6점이상') {
+                    filterMin = 6;
+                    filterMax = Infinity;
+                } else {
+                    filterMin = parseInt(currentARFilter, 10);
+                    filterMax = filterMin + 0.9;
+                }
+    
+                arMatch = !isNaN(cardAR) && cardAR >= filterMin && cardAR <= filterMax;
+            }
+    
+            card.style.display = categoryMatch && arMatch ? '' : 'none';
+        });
+    
+        fixColumnHeights(); // ✅ 필터 후 높이 맞춤
+    }
+    
+    /* =========================
+       탭 클릭 이벤트
+    ========================= */
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+    
+            currentCategory = tab.textContent.trim();
+            applyFilters();
+        });
+    });
+    
+    /* =========================
+       AR 필터
+    ========================= */
+    function toggleDropdown() {
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        arrowImg.src = dropdown.style.display === 'block' ? 'arrow_up.svg' : 'arrow_down.svg';
+    }
+    
     function selectFilter(option) {
-        currentSelected = option.textContent;
-        selectedFilter.textContent = currentSelected;
+        currentARFilter = option.textContent;
+        selectedFilter.textContent = currentARFilter;
         dropdown.style.display = 'none';
-        arrowImg.src = 'arrow_down.svg'; // 선택하면 닫히니까 아래 화살표로
+        arrowImg.src = 'arrow_down.svg';
+        applyFilters();
     }
-
+    
     window.addEventListener('click', (e) => {
         if (!e.target.closest('.filter-container')) {
             dropdown.style.display = 'none';
-            arrowImg.src = 'arrow_down.svg'; // 외부 클릭 시 닫히면 아래 화살표
+            arrowImg.src = 'arrow_down.svg';
+        }
+    });
+    
+    /* =========================
+       모달 상세보기
+    ========================= */
+    function bindDetailEvents() {
+        document.querySelectorAll('.detail-trigger').forEach(img => {
+            img.addEventListener('click', () => {
+                detailImage.src = img.dataset.detailImg;
+                detailISBN.textContent = img.dataset.isbn;
+                detailAuthor.textContent = img.dataset.author;
+                detailPublisher.textContent = img.dataset.publisher;
+    
+                modal.classList.add('active');
+            });
+        });
+    }
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target.classList.contains('detail-overlay')) {
+            modal.classList.remove('active');
         }
     });
 
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-        });
-    });
-</script>
-
-
+    document.querySelector('.detail-content .close-btn').addEventListener('click', () => {
+    modal.classList.remove('active');
+});
+    
+    /* =========================
+       열 단위 카드 높이 맞춤
+    ========================= */
+    function fixColumnHeights() {
+        const grid = document.querySelector('.card-grid');
+        const cards = Array.from(grid.children).filter(c => c.style.display !== 'none');
+    
+        if (!cards.length) return;
+    
+        // grid-template-columns 기반으로 열 개수 계산
+        const style = getComputedStyle(grid);
+        const gap = parseInt(style.columnGap) || 0;
+        const gridWidth = grid.clientWidth;
+        const colWidth = cards[0].offsetWidth;
+        const cols = Math.floor((gridWidth + gap) / (colWidth + gap)) || 1;
+    
+        // 카드 높이 초기화
+        cards.forEach(c => c.style.height = 'auto');
+    
+        // 열 단위로 높이 맞춤
+        for (let i = 0; i < cards.length; i += cols) {
+            const rowCards = cards.slice(i, i + cols);
+            const maxHeight = Math.max(...rowCards.map(c => c.offsetHeight));
+            rowCards.forEach(c => c.style.height = maxHeight + 'px');
+        }
+    }
+    
+    // 화면 리사이즈 시 높이 재계산
+    window.addEventListener('resize', fixColumnHeights);
+    
+    </script>
 </body>
 </html>
-
