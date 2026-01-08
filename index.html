@@ -497,7 +497,7 @@ function renderCards() {
             const card = document.createElement('div');
             card.className = 'book-card';
             card.dataset.category = book['카테고리'];
-            card.dataset.ar = book['AR'] ? parseFloat(book['AR']) : '';
+            card.dataset.ar = book['AR'] || '';
             card.dataset.author = book['작가'] || '';
             card.dataset.publisher = book['출판사'] || '';
             card.dataset.isbn = book['ISBN'] || '';
@@ -544,20 +544,43 @@ function applyFilters() {
         const categoryMatch = currentCategory === '전체' || categories.includes(currentCategory);
 
         let arMatch = true;
-        if (currentARFilter && currentARFilter !== '전체') {
-            const cardAR = parseFloat(card.dataset.ar);
-            let filterMin, filterMax;
 
-            if (currentARFilter === '6점이상') {
-                filterMin = 6;
-                filterMax = Infinity;
-            } else {
-                filterMin = parseInt(currentARFilter, 10);
-                filterMax = filterMin + 0.9;
-            }
+if (currentARFilter && currentARFilter !== '전체') {
+    const arText = (card.dataset.ar || '').trim();
 
-            arMatch = !isNaN(cardAR) && cardAR >= filterMin && cardAR <= filterMax;
+    // ✅ AR 값이 없으면 필터 통과
+    if (!arText) {
+        arMatch = true;
+    } else {
+        let minAR, maxAR;
+
+        if (arText.includes('~')) {
+            const parts = arText.split('~').map(v => parseFloat(v));
+            minAR = parts[0];
+            maxAR = parts[1];
+        } else {
+            minAR = maxAR = parseFloat(arText);
         }
+
+        let filterMin, filterMax;
+
+        if (currentARFilter === '6점이상') {
+            filterMin = 6;
+            filterMax = Infinity;
+        } else {
+            filterMin = parseInt(currentARFilter, 10);
+            filterMax = filterMin + 0.9;
+        }
+
+        // ✅ 범위 겹침 판단
+        arMatch =
+            !isNaN(minAR) &&
+            !isNaN(maxAR) &&
+            maxAR >= filterMin &&
+            minAR <= filterMax;
+    }
+}
+
 
         card.style.display = categoryMatch && arMatch ? '' : 'none';
     });
