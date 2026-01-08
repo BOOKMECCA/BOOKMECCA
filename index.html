@@ -548,9 +548,9 @@ function applyFilters() {
 if (currentARFilter && currentARFilter !== '전체') {
     const arText = (card.dataset.ar || '').trim();
 
-    // ✅ AR 값이 없으면 필터 통과
+    // ❌ AR 값이 없으면 필터 탈락
     if (!arText) {
-        arMatch = true;
+        arMatch = false;
     } else {
         let minAR, maxAR;
 
@@ -572,7 +572,7 @@ if (currentARFilter && currentARFilter !== '전체') {
             filterMax = filterMin + 0.9;
         }
 
-        // ✅ 범위 겹침 판단
+        // ✅ 범위 겹침 체크
         arMatch =
             !isNaN(minAR) &&
             !isNaN(maxAR) &&
@@ -580,6 +580,7 @@ if (currentARFilter && currentARFilter !== '전체') {
             minAR <= filterMax;
     }
 }
+
 
 
         card.style.display = categoryMatch && arMatch ? '' : 'none';
