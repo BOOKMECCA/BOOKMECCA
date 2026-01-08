@@ -548,7 +548,7 @@ function applyFilters() {
 if (currentARFilter && currentARFilter !== '전체') {
     const arText = (card.dataset.ar || '').trim();
 
-    // ❌ AR 값이 없으면 필터 탈락
+    // AR 값이 없으면 필터 탈락
     if (!arText) {
         arMatch = false;
     } else {
@@ -572,7 +572,7 @@ if (currentARFilter && currentARFilter !== '전체') {
             filterMax = filterMin + 0.9;
         }
 
-        // ✅ 범위 겹침 체크
+        // 범위 겹침 체크
         arMatch =
             !isNaN(minAR) &&
             !isNaN(maxAR) &&
@@ -677,7 +677,7 @@ function bindDetailEvents() {
             detailAuthor.textContent = img.dataset.author;
             detailPublisher.textContent = img.dataset.publisher;
 
-            // 👉 작가 클릭 시 검색
+            // 작가 클릭 시 검색
 detailAuthor.onclick = () => {
     searchInput.value = img.dataset.author;
     searchInput.dispatchEvent(
@@ -686,7 +686,7 @@ detailAuthor.onclick = () => {
     modal.classList.remove('active');
 };
 
-// 👉 출판사 클릭 시 검색
+// 출판사 클릭 시 검색
 detailPublisher.onclick = () => {
     searchInput.value = img.dataset.publisher;
     searchInput.dispatchEvent(
@@ -719,7 +719,7 @@ const searchInput = document.querySelector('.search-input');
 searchInput.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;
 
-    // 🔥 검색 시 탭 전부 비활성화
+    // 검색 시 탭 전부 비활성화
     tabs.forEach(t => t.classList.remove('active'));
     currentCategory = '전체';
 
