@@ -315,6 +315,7 @@
         .detail-content {
             position: absolute;
             left: 50%;
+            top: 50%;
             transform: translate(-50%, -50%);
             width: 90%;
             max-width: 320px;
@@ -683,25 +684,24 @@ function bindDetailEvents() {
             detailPublisher.textContent = img.dataset.publisher;
 
             // 작가 클릭 시 검색
-            detailAuthor.onclick = () => {
-            searchInput.value = img.dataset.author;
-            searchInput.dispatchEvent(
+detailAuthor.onclick = () => {
+    searchInput.value = img.dataset.author;
+    searchInput.dispatchEvent(
         new KeyboardEvent('keydown', { key: 'Enter' })
     );
     modal.classList.remove('active');
 };
 
-            // 출판사 클릭 시 검색
-            detailPublisher.onclick = () => {
-            searchInput.value = img.dataset.publisher;
-            searchInput.dispatchEvent(
+// 출판사 클릭 시 검색
+detailPublisher.onclick = () => {
+    searchInput.value = img.dataset.publisher;
+    searchInput.dispatchEvent(
         new KeyboardEvent('keydown', { key: 'Enter' })
     );
     modal.classList.remove('active');
 };
+
             modal.classList.add('active');
-            document.body.style.overflow = 'hidden'; //
-
         });
     });
 }
@@ -710,13 +710,11 @@ function bindDetailEvents() {
 modal.addEventListener('click', (e) => {
     if (e.target.classList.contains('detail-overlay')) {
         modal.classList.remove('active');
-        document.body.style.overflow = '';
     }
 });
 
 document.querySelector('.detail-content .close-btn').addEventListener('click', () => {
     modal.classList.remove('active');
-    document.body.style.overflow = 'auto';
 });
 
 /* =========================
@@ -801,8 +799,9 @@ function fixColumnHeights() {
 }
 
 
-window.addEventListener('resize', fixColumnHeights);
 
+
+window.addEventListener('resize', fixColumnHeights);
 
 </script>
 </body>
