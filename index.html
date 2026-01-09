@@ -700,8 +700,14 @@ function bindDetailEvents() {
     );
     modal.classList.remove('active');
 };
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden'; //
+scrollPosition = window.pageYOffset; // 현재 스크롤 위치 저장
+modal.classList.add('active');
+document.body.style.position = 'fixed';
+document.body.style.top = `-${scrollPosition}px`;
+document.body.style.left = '0';
+document.body.style.right = '0';
+document.body.style.width = '100%';
+
         });
     });
 }
@@ -710,7 +716,13 @@ function bindDetailEvents() {
 modal.addEventListener('click', (e) => {
     if (e.target.classList.contains('detail-overlay')) {
         modal.classList.remove('active');
-        document.body.style.overflow = 'auto';
+document.body.style.position = '';
+document.body.style.top = '';
+document.body.style.left = '';
+document.body.style.right = '';
+document.body.style.width = '';
+window.scrollTo(0, scrollPosition); // 원래 스크롤 위치 복원
+
     }
 });
 
