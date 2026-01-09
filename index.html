@@ -315,7 +315,6 @@
         .detail-content {
             position: absolute;
             left: 50%;
-            top: 50%;
             transform: translate(-50%, -50%);
             width: 90%;
             max-width: 320px;
@@ -702,6 +701,12 @@ function bindDetailEvents() {
 };
             modal.classList.add('active');
             document.body.style.overflow = 'hidden'; //
+
+            requestAnimationFrame(() => {
+    const detailContent = modal.querySelector('.detail-content');
+    const vh = window.innerHeight;
+    detailContent.style.top = (vh / 2) + 'px';
+});
         });
     });
 }
@@ -804,6 +809,13 @@ function fixColumnHeights() {
 
 
 window.addEventListener('resize', fixColumnHeights);
+window.addEventListener('resize', () => {
+    if (modal.classList.contains('active')) {
+        const detailContent = modal.querySelector('.detail-content');
+        const vh = window.innerHeight;
+        detailContent.style.top = (vh / 2) + 'px';
+    }
+});
 
 </script>
 </body>
