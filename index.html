@@ -45,7 +45,7 @@
         .search-wrap {
             position: relative;
             width: 176px;
-            margin-top: 18px;
+            margin-top: 12px;
         }
 
         .search-icon {
@@ -53,17 +53,17 @@
             left: 10px;
             top: 50%;
             transform: translateY(-50%);
-            width: 14px;
-            height: 14px;
+            width: 15px;
+            height: 15px;
             pointer-events: none;
         }
 
         .search-input {
             width: 176px;
-            height: 29px;
+            height: 35px;
             padding: 4px 8px 4px 32px;
             border: 1px solid #B6D23C;
-            border-radius: 14.5px;
+            border-radius: 20px;
             background-color: #FFFFFF;
             font-size: 14px;
             box-sizing: border-box;
@@ -109,7 +109,7 @@
         .filter img.arrow {
             width: 12px;
             height: 12px;
-            margin-left: 4px;
+            margin-left: 5px;
             position: relative;
             top: 1px;
         }
@@ -278,7 +278,7 @@
         .book-title {
             font-size: 14px;
             font-weight: 500;
-            margin: 0 0 4px 0;
+            margin: 5px;
         }
 
         .ar-level {
@@ -290,7 +290,7 @@
         .book-desc {
             font-size: 13px;
             color: #555555;
-            margin-top: 6px;
+            margin: 5px;
             line-height: 1.4;
             white-space: pre-line;
         }
@@ -596,13 +596,19 @@ tabs.forEach(tab => {
     tab.addEventListener('click', () => {
         tabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-
         currentCategory = tab.textContent.trim();
-
         searchInput.value = '';
         document.getElementById('noResultsMsg').style.display = 'none';
-
         applyFilters();
+
+        // =========================
+        // 자동 스크롤 추가
+        // =========================
+        tab.scrollIntoView({
+            behavior: 'smooth',   
+            inline: 'center',     // 탭을 가로 중앙에 위치
+            block: 'nearest'      // 세로는 현재 위치 유지
+        });
     });
 });
 
@@ -733,11 +739,14 @@ searchInput.addEventListener('keydown', (e) => {
         const author = card.dataset.author.toLowerCase();
         const publisher = card.dataset.publisher.toLowerCase();
 
+        const isbn = card.dataset.isbn || '';
+
         const match =
-            search.includes(query) ||
-            title.includes(query) ||
-            author.includes(query) ||
-            publisher.includes(query);
+    search.includes(query) ||
+    title.includes(query) ||
+    author.includes(query) ||
+    publisher.includes(query) ||
+    isbn.includes(query);  //
 
         card.style.display = match ? '' : 'none';
         if (match) anyVisible = true;
@@ -747,6 +756,7 @@ searchInput.addEventListener('keydown', (e) => {
         anyVisible ? 'none' : 'block';
 
     setTimeout(fixColumnHeights, 50);
+    searchInput.blur();
 });
 
 
@@ -796,5 +806,3 @@ window.addEventListener('resize', fixColumnHeights);
 </script>
 </body>
 </html>
-
-
