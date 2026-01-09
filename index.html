@@ -684,24 +684,30 @@ function bindDetailEvents() {
             detailPublisher.textContent = img.dataset.publisher;
 
             // 작가 클릭 시 검색
-            detailAuthor.onclick = () => {
-            searchInput.value = img.dataset.author;
-            searchInput.dispatchEvent(
+detailAuthor.onclick = () => {
+    modal.classList.remove('active');       // 먼저 모달 닫기
+    document.body.style.overflow = 'auto';  // 스크롤 복원
+
+    searchInput.value = img.dataset.author;
+    searchInput.dispatchEvent(
         new KeyboardEvent('keydown', { key: 'Enter' })
     );
-    modal.classList.remove('active');
 };
 
-            // 출판사 클릭 시 검색
-            detailPublisher.onclick = () => {
-            searchInput.value = img.dataset.publisher;
-            searchInput.dispatchEvent(
+// 출판사 클릭 시 검색
+detailPublisher.onclick = () => {
+    modal.classList.remove('active');       // 먼저 모달 닫기
+    document.body.style.overflow = 'auto';  // 스크롤 복원
+
+    searchInput.value = img.dataset.publisher;
+    searchInput.dispatchEvent(
         new KeyboardEvent('keydown', { key: 'Enter' })
     );
-    modal.classList.remove('active');
 };
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden'; //
+
+// 카드 클릭 시 모달 열기
+modal.classList.add('active');
+document.body.style.overflow = 'hidden';
         });
     });
 }
@@ -805,4 +811,3 @@ window.addEventListener('resize', fixColumnHeights);
 </script>
 </body>
 </html>
-
