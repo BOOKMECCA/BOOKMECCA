@@ -710,11 +710,13 @@ function bindDetailEvents() {
 modal.addEventListener('click', (e) => {
     if (e.target.classList.contains('detail-overlay')) {
         modal.classList.remove('active');
+        document.body.style.overflow = '';
     }
 });
 
 document.querySelector('.detail-content .close-btn').addEventListener('click', () => {
     modal.classList.remove('active');
+    document.body.style.overflow = '';
 });
 
 /* =========================
