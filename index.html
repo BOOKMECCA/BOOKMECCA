@@ -42,32 +42,55 @@
             object-fit: contain;
         }
 
-        .search-wrap {
-            position: relative;
-            width: 176px;
-            margin-top: 12px;
-        }
+        /* =========================
+   검색창 컨테이너
+========================= */
+.search-wrap {
+    position: relative;
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end; /* 오른쪽 끝 기준 */
+    align-items: center;
+}
 
-        .search-icon {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 15px;
-            height: 15px;
-            pointer-events: none;
-        }
+/* 검색 아이콘 */
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%); /* 세로 중앙 */
+    width: 15px;
+    height: 15px;
+    pointer-events: none;
+}
 
-        .search-input {
-            width: 176px;
-            height: 35px;
-            padding: 4px 8px 4px 32px;
-            border: 1px solid #B6D23C;
-            border-radius: 20px;
-            background-color: #FFFFFF;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
+/* 검색 입력창 */
+.search-input {
+    width: 200px;               /* 초기 너비 */
+    height: 35px;               /* 세로 고정 */
+    padding: 0 8px 0 32px;      /* 위아래 패딩 제거, 아이콘 공간 확보 */
+    border: 1px solid #B6D23C;
+    border-radius: 20px;
+    background-color: #FFFFFF;
+    font-size: 14px;
+    box-sizing: border-box;     /* border 포함해서 정확히 35px 유지 */
+    transition: width 0.3s ease;
+}
+
+/* 검색창 확장 (왼쪽 기준 유지) */
+.search-wrap.expanded .search-input {
+    width: 300px;               /* 원하는 최대 너비 */
+    height: 35px;               /* 세로 유지 */
+}
+
+/* =========================
+   탭 텍스트 수직 조정
+========================= */
+.tab span {
+    display: inline-block;      /* transform 적용 가능 */
+    transform: translateY(-1px); /* 위로 살짝 이동, 필요시 조정 */
+}
+
 
         .search-input:focus {
             outline: none;
@@ -79,7 +102,7 @@
         }
 
         .recommend-section h2 {
-            font-size: 30px;
+            font-size: 20px;
             font-weight: 500;
             margin: 0 0 8px 0;
         }
@@ -179,6 +202,12 @@
             background-color: #36A5FF;
             color: #FFFFFF;
         }
+        
+        .tab span {
+    display: inline-block; /* transform 적용 위해 필요 */
+    transform: translateY(-1px); /* 1px 위로 이동, 필요시 조정 */
+}
+
 
         main {
             flex: 1 0 auto;
@@ -397,7 +426,7 @@
     </header>
 
     <div class="recommend-section">
-        <h2>추천 도서 리스트</h2>
+        <h2>도서 추천 및 샘플 미리보기</h2>
         <p>
             미국, 영국 출판사에서 수입한 어린이 영어원서<br>
             신간 소개 및 유교전, 국제학교 베스트셀러 도서
@@ -420,12 +449,13 @@
         </div>
 
         <div class="tab-container">
-            <div class="tab active">대표도서</div>
-            <div class="tab">리더스</div>
-            <div class="tab">그래픽노블</div>
-            <div class="tab">챕터북</div>
-            <div class="tab">스토리북</div>
-            <div class="tab">전체</div>
+            <div class="tab active"><span>전단도서</span></div>
+<div class="tab"><span>추천 리더스</span></div>
+<div class="tab"><span>추천 그래픽노블</span></div>
+<div class="tab"><span>추천 챕터북</span></div>
+<div class="tab"><span>추천 스토리북</span></div>
+<div class="tab"><span>전체</span></div>
+
         </div>
     </div>
 
